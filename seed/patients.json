@@ -1,0 +1,40 @@
+{
+  "_meta": { "note": "All patients are synthetic. Phone numbers are fake placeholders. discharge_date is set so that on the scenario start date P001 is on day 8.", "scenario_start": "2026-10-26T03:00:00Z", "clinic": "Demo Clinic" },
+  "clinicians": [
+    { "id": "C001", "name": "Dr. Anitha", "email": "dr.anitha@demo.setu", "role": "clinician", "password": "demo123" },
+    { "id": "C002", "name": "Admin", "email": "admin@demo.setu", "role": "admin", "password": "demo123" }
+  ],
+  "patients": [
+    {
+      "id": "P001", "name": "Ramesh Kumar", "age": 58, "sex": "M", "language": "te", "phone": "+910000000001",
+      "location": "Vijayawada", "conditions": ["diabetes", "hypertension"], "discharge_date": "2026-10-18",
+      "role_in_demo": "Hero patient: live scenario on day 8 (missed dose x2 plus leg swelling -> HIGH alert)",
+      "plan": "from discharge_summary_ramesh.txt",
+      "history": "scenario_ramesh.json"
+    },
+    {
+      "id": "P002", "name": "Lakshmi Devi", "age": 64, "sex": "F", "language": "te", "phone": "+910000000002",
+      "location": "Guntur", "conditions": ["hypertension"], "discharge_date": "2026-10-21",
+      "role_in_demo": "MEDIUM alert already open: missed doses two days running (R-ADH-01), day 5",
+      "history_summary": { "adherence_last_7d": [1, 1, 1, 1, 0, 0], "open_alert_rule": "R-ADH-01", "last_bp": [148, 92] }
+    },
+    {
+      "id": "P003", "name": "Suresh Patel", "age": 49, "sex": "M", "language": "hi", "phone": "+910000000003",
+      "location": "Hyderabad", "conditions": ["diabetes"], "discharge_date": "2026-10-23",
+      "role_in_demo": "LOW alert: asked a medical question ('Can I stop my sugar tablet?'), day 3",
+      "history_summary": { "adherence_last_7d": [1, 1, 1], "open_alert_rule": "R-QUESTION-01", "last_glucose": 168 }
+    },
+    {
+      "id": "P004", "name": "Anil Reddy", "age": 71, "sex": "M", "language": "en", "phone": "+910000000004",
+      "location": "Visakhapatnam", "conditions": ["diabetes", "hypertension"], "discharge_date": "2026-10-12",
+      "role_in_demo": "Stable and adherent: shows the 'everyone on track' state, day 14",
+      "history_summary": { "adherence_last_7d": [1, 1, 1, 1, 1, 1, 1], "open_alert_rule": null, "last_glucose": 126, "last_bp": [128, 80] }
+    },
+    {
+      "id": "P005", "name": "Padma Rao", "age": 61, "sex": "F", "language": "te", "phone": "+910000000005",
+      "location": "Eluru", "conditions": ["diabetes", "hypertension"], "discharge_date": "2026-10-19",
+      "role_in_demo": "Silent patient: no reply to last 2 check-ins (R-NORESP-01, MEDIUM), day 7",
+      "history_summary": { "adherence_last_7d": [1, 1, 1, 1, null, null], "open_alert_rule": "R-NORESP-01" }
+    }
+  ]
+}

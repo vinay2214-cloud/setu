@@ -1,0 +1,230 @@
+{
+  "language": "te",
+  "diagnoses": [
+    {
+      "name": "Type 2 diabetes mellitus",
+      "code": "diabetes",
+      "source_span": {
+        "start": 232,
+        "end": 289,
+        "text": "Type 2 diabetes mellitus (admitted with high blood sugar)"
+      },
+      "confidence": 0.98,
+      "needs_review": false
+    },
+    {
+      "name": "Essential hypertension",
+      "code": "hypertension",
+      "source_span": {
+        "start": 293,
+        "end": 315,
+        "text": "Essential hypertension"
+      },
+      "confidence": 0.98,
+      "needs_review": false
+    }
+  ],
+  "medications": [
+    {
+      "id": "med_metformin",
+      "name": "Metformin",
+      "strength": "500 mg",
+      "form": "tablet",
+      "dose_text": "500 mg twice daily after food",
+      "frequency_code": "BD",
+      "times": [
+        "08:00",
+        "20:00"
+      ],
+      "timing_note": "after food",
+      "criticality": "critical",
+      "purpose": "diabetes",
+      "source_span": {
+        "start": 544,
+        "end": 578,
+        "text": "Tab Metformin 500 mg BD after food"
+      },
+      "confidence": 0.96,
+      "needs_review": false
+    },
+    {
+      "id": "med_glimepiride",
+      "name": "Glimepiride",
+      "strength": "1 mg",
+      "form": "tablet",
+      "dose_text": "1 mg once daily before breakfast",
+      "frequency_code": "OD",
+      "times": [
+        "08:00"
+      ],
+      "timing_note": "before breakfast",
+      "criticality": "critical",
+      "purpose": "diabetes",
+      "source_span": {
+        "start": 582,
+        "end": 622,
+        "text": "Tab Glimepiride 1 mg OD before breakfast"
+      },
+      "confidence": 0.96,
+      "needs_review": false
+    },
+    {
+      "id": "med_amlodipine",
+      "name": "Amlodipine",
+      "strength": "5 mg",
+      "form": "tablet",
+      "dose_text": "5 mg once daily in the morning",
+      "frequency_code": "OD",
+      "times": [
+        "08:00"
+      ],
+      "timing_note": "in the morning",
+      "criticality": "critical",
+      "purpose": "hypertension",
+      "source_span": {
+        "start": 626,
+        "end": 663,
+        "text": "Tab Amlodipine 5 mg OD in the morning"
+      },
+      "confidence": 0.96,
+      "needs_review": false
+    },
+    {
+      "id": "med_telmisartan",
+      "name": "Telmisartan",
+      "strength": "40 mg",
+      "form": "tablet",
+      "dose_text": "40 mg once daily in the morning",
+      "frequency_code": "OD",
+      "times": [
+        "08:00"
+      ],
+      "timing_note": "in the morning",
+      "criticality": "critical",
+      "purpose": "hypertension",
+      "source_span": {
+        "start": 667,
+        "end": 706,
+        "text": "Tab Telmisartan 40 mg OD in the morning"
+      },
+      "confidence": 0.96,
+      "needs_review": false
+    },
+    {
+      "id": "med_atorvastatin",
+      "name": "Atorvastatin",
+      "strength": "10 mg",
+      "form": "tablet",
+      "dose_text": "10 mg at bedtime",
+      "frequency_code": "HS",
+      "times": [
+        "22:00"
+      ],
+      "timing_note": "at bedtime",
+      "criticality": "standard",
+      "purpose": "cholesterol",
+      "source_span": {
+        "start": 710,
+        "end": 746,
+        "text": "Tab Atorvastatin 10 mg HS at bedtime"
+      },
+      "confidence": 0.96,
+      "needs_review": false
+    }
+  ],
+  "monitoring": [
+    {
+      "type": "glucose",
+      "frequency": "daily",
+      "context": "fasting",
+      "target_note": "As advised by your doctor",
+      "source_span": {
+        "start": 769,
+        "end": 830,
+        "text": "Check fasting blood sugar every morning and note the reading."
+      },
+      "confidence": 0.95,
+      "needs_review": false
+    },
+    {
+      "type": "bp",
+      "frequency": "daily",
+      "context": "morning",
+      "target_note": "As advised by your doctor",
+      "source_span": {
+        "start": 833,
+        "end": 889,
+        "text": "Check blood pressure every morning and note the reading."
+      },
+      "confidence": 0.95,
+      "needs_review": false
+    }
+  ],
+  "diet": {
+    "restrictions": [
+      "low_salt",
+      "avoid_sweets_and_sugary_drinks",
+      "regular_meal_timing"
+    ],
+    "goals": [
+      "do_not_skip_meals"
+    ],
+    "notes": "Low salt diet. Avoid sweets and sugary drinks. Keep regular meal timings and do not skip meals.",
+    "source_span": {
+      "start": 903,
+      "end": 998,
+      "text": "Low salt diet. Avoid sweets and sugary drinks. Keep regular meal timings and do not skip meals."
+    }
+  },
+  "activity": {
+    "notes": "Light walking for 20 to 30 minutes daily as tolerated.",
+    "source_span": {
+      "start": 1009,
+      "end": 1063,
+      "text": "Light walking for 20 to 30 minutes daily as tolerated."
+    }
+  },
+  "red_flags": [
+    {
+      "symptom_code": "chest_pain",
+      "label": "Chest pain"
+    },
+    {
+      "symptom_code": "breathlessness",
+      "label": "Breathlessness"
+    },
+    {
+      "symptom_code": "fainting",
+      "label": "Fainting"
+    },
+    {
+      "symptom_code": "confusion",
+      "label": "Confusion"
+    },
+    {
+      "symptom_code": "one_sided_weakness",
+      "label": "Weakness on one side of the body"
+    },
+    {
+      "symptom_code": "slurred_speech",
+      "label": "Slurred speech"
+    },
+    {
+      "symptom_code": "leg_swelling",
+      "label": "New swelling of the legs"
+    }
+  ],
+  "follow_ups": [
+    {
+      "type": "clinic_visit",
+      "due_date": "2026-11-01",
+      "with": "Physician OPD",
+      "source_span": {
+        "start": 1297,
+        "end": 1362,
+        "text": "Review in Physician OPD on 01-Nov-2026 with fasting sugar report."
+      }
+    }
+  ],
+  "warnings": []
+}

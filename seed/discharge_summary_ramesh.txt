@@ -1,0 +1,35 @@
+SYNTHETIC DISCHARGE SUMMARY - DEMO ONLY - NOT A REAL PATIENT
+Demo Clinic General Hospital
+
+Patient: Ramesh Kumar     Age/Sex: 58 / M     MRN: DEMO-0001
+Date of admission: 14-Oct-2026     Date of discharge: 18-Oct-2026
+
+DIAGNOSES
+1. Type 2 diabetes mellitus (admitted with high blood sugar)
+2. Essential hypertension
+
+HOSPITAL COURSE
+Admitted with high blood sugar and tiredness. Blood sugar was brought under control and the patient was moved to oral medicines. Blood pressure was optimised. No cardiac complications.
+
+DISCHARGE MEDICATIONS
+1. Tab Metformin 500 mg BD after food
+2. Tab Glimepiride 1 mg OD before breakfast
+3. Tab Amlodipine 5 mg OD in the morning
+4. Tab Telmisartan 40 mg OD in the morning
+5. Tab Atorvastatin 10 mg HS at bedtime
+
+MONITORING AT HOME
+- Check fasting blood sugar every morning and note the reading.
+- Check blood pressure every morning and note the reading.
+
+DIET ADVICE
+Low salt diet. Avoid sweets and sugary drinks. Keep regular meal timings and do not skip meals.
+
+ACTIVITY
+Light walking for 20 to 30 minutes daily as tolerated.
+
+RED FLAGS - CONTACT THE DOCTOR OR CALL EMERGENCY IF
+Chest pain, breathlessness, fainting, confusion, weakness on one side of the body, slurred speech, very low or very high blood sugar readings, new swelling of the legs.
+
+FOLLOW-UP
+Review in Physician OPD on 01-Nov-2026 with fasting sugar report.

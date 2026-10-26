@@ -1,0 +1,61 @@
+/* Setu design tokens. Import once in app/globals.css, map into Tailwind via theme.extend.
+   Principles: calm clinical teal, warm gold accent, severity never conveyed by colour alone. */
+
+:root {
+  /* Brand */
+  --brand-50:  #effcf9;
+  --brand-100: #c9f5ec;
+  --brand-300: #5fd3bd;
+  --brand-500: #14a38b;
+  --brand-600: #0f8a76;
+  --brand-700: #0f6e60;   /* primary buttons, links (AA on white) */
+  --brand-900: #0a3d36;
+  --accent-500: #d9962b;  /* gold: highlights, "AI-extracted" accents */
+  --accent-100: #fbefd6;
+
+  /* Neutrals */
+  --ink-900: #0f1f24;
+  --ink-700: #2c3f45;
+  --ink-500: #5b6f76;
+  --ink-300: #a9b8bd;
+  --line:    #dbe4e7;
+  --surface: #ffffff;
+  --canvas:  #f5f8f9;
+
+  /* Severity (always pair with icon + text label) */
+  --sev-critical-bg: #b42318;  --sev-critical-fg: #ffffff;  --sev-critical-soft: #fde8e6;
+  --sev-high-bg:     #c2410c;  --sev-high-fg:     #ffffff;  --sev-high-soft:     #ffedd5;
+  --sev-medium-bg:   #f2c230;  --sev-medium-fg:   #3a2b00;  --sev-medium-soft:   #fff6d6;
+  --sev-low-bg:      #2563eb;  --sev-low-fg:      #ffffff;  --sev-low-soft:      #e3edff;
+  --ok-bg:           #15803d;  --ok-soft:         #dcf5e4;
+
+  /* Chat (patient simulator) */
+  --chat-bg:        #efe9de;
+  --chat-in:        #ffffff;
+  --chat-out:       #d9f5e6;
+  --chat-header:    #0f6e60;
+
+  /* Radius, shadow, spacing (4px grid) */
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px;
+  --shadow-sm: 0 1px 2px rgba(15,31,36,.06);
+  --shadow-md: 0 6px 20px rgba(15,31,36,.10);
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+
+  /* Type */
+  --font-sans:  'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Fraunces', Georgia, serif;                       /* headings, KPI numbers */
+  --font-te:    'Noto Sans Telugu', 'Nirmala UI', sans-serif;
+  --font-hi:    'Noto Sans Devanagari', 'Nirmala UI', sans-serif;
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px; --fs-xl: 24px; --fs-2xl: 32px;
+
+  /* Motion */
+  --ease: cubic-bezier(.2,.8,.2,1); --dur-fast: 120ms; --dur: 200ms;
+}
+
+/* Language-aware typography: set lang attr on message bubbles and text blocks */
+:lang(te) { font-family: var(--font-te), var(--font-sans); line-height: 1.7; }
+:lang(hi) { font-family: var(--font-hi), var(--font-sans); line-height: 1.65; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}

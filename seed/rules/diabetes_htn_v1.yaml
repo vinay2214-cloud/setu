@@ -1,0 +1,286 @@
+# Setu rule pack: diabetes + hypertension post-discharge monitoring
+# STATUS: DRAFT. Every threshold below is a PLACEHOLDER for the prototype.
+# A named clinician must review and approve before any real use (see docs/08 section 3).
+# Do not edit thresholds to make tests pass. Change them only through clinician review.
+
+pack:
+  id: diabetes_htn
+  name: Diabetes + Hypertension post-discharge monitoring
+  version: "1.0.0"
+  status: DRAFT
+  approved_by: null
+  approved_at: null
+  notes: >
+    Draft thresholds for demonstration. Glucose bands follow commonly cited hypoglycaemia
+    levels (below 70 and below 54 mg/dL) and round-number high-glucose and BP triage bands.
+    A clinician must confirm each value against the clinic protocol.
+
+defaults:
+  sla_minutes: { CRITICAL: 15, HIGH: 240, MEDIUM: 1440, LOW: 4320 }
+  dedupe_window_hours: { CRITICAL: 0, HIGH: 12, MEDIUM: 12, LOW: 24 }
+
+# Semantics:
+#  - Every rule is evaluated. Within the same `family`, only the highest-severity fired rule is kept.
+#  - Operators: ==, !=, >, >=, <, <=, in, not_in, contains_any, contains_all, is_true, is_false
+#  - A missing (null) fact makes comparison operators false (never an error).
+#  - Facts are defined in docs/03-BACKEND-SPEC.md section 5.2.
+
+rules:
+  # ---------- Critical symptoms (fail-safe) ----------
+  - id: R-CRIT-SYM-01
+    family: critical_symptom
+    title: Critical symptom reported
+    severity: CRITICAL
+    when:
+      any:
+        - { fact: symptoms, op: contains_any, value: [chest_pain, breathlessness, fainting, confusion, one_sided_weakness, slurred_speech] }
+        - { fact: symptom_severity_unknown_critical, op: is_true }
+    suggested_action: Call the patient immediately; confirm emergency services were contacted.
+    patient_template: emergency_advice
+    rationale: Chest pain, breathlessness, fainting, confusion, one-sided weakness or slurred speech may indicate an emergency. Escalate first, assess later.
+    clinician_review: required
+
+  # ---------- Low glucose ----------
+  - id: R-GLU-LOW-02
+    family: glucose_low
+    title: Very low glucose reading
+    severity: CRITICAL
+    when: { fact: glucose_latest, op: "<", value: 54 }
+    suggested_action: Call the patient immediately; confirm safety and emergency access.
+    patient_template: glucose_low_advice
+    rationale: Placeholder threshold for clinically significant hypoglycaemia (below 54 mg/dL).
+    clinician_review: required
+
+  - id: R-GLU-LOW-01
+    family: glucose_low
+    title: Low glucose reading
+    severity: HIGH
+    when: { fact: glucose_latest, op: "<", value: 70 }
+    suggested_action: Call within 4 hours; review diabetes medicines.
+    patient_template: glucose_low_advice
+    rationale: Placeholder threshold for hypoglycaemia (below 70 mg/dL).
+    clinician_review: required
+
+  - id: R-HYPO-SYM-01
+    family: glucose_low
+    title: Sweating or shaking in a patient with diabetes
+    severity: HIGH
+    when:
+      all:
+        - { fact: symptoms, op: contains_any, value: [sweating_shaking] }
+        - { fact: conditions, op: contains_any, value: [diabetes] }
+    suggested_action: Call within 4 hours; ask for a glucose reading if available.
+    patient_template: escalate_notified
+    rationale: Sweating and shaking can accompany low blood sugar in people on diabetes medicines.
+    clinician_review: required
+
+  # ---------- High glucose ----------
+  - id: R-GLU-HIGH-02
+    family: glucose_high
+    title: Very high glucose reading
+    severity: HIGH
+    when: { fact: glucose_latest, op: ">=", value: 300 }
+    suggested_action: Call within 4 hours; review adherence and symptoms.
+    patient_template: escalate_notified
+    rationale: Placeholder high-glucose triage threshold (300 mg/dL or more).
+    clinician_review: required
+
+  - id: R-GLU-HIGH-01
+    family: glucose_high
+    title: High glucose reading
+    severity: MEDIUM
+    when: { fact: glucose_latest, op: ">=", value: 250 }
+    suggested_action: Review within 24 hours.
+    patient_template: escalate_notified
+    rationale: Placeholder elevated-glucose threshold (250 mg/dL or more).
+    clinician_review: required
+
+  # ---------- Blood pressure ----------
+  - id: R-BP-CRISIS-02
+    family: bp_high
+    title: Severely high BP with warning symptoms
+    severity: CRITICAL
+    when:
+      all:
+        - any:
+            - { fact: bp_sys_latest, op: ">=", value: 180 }
+            - { fact: bp_dia_latest, op: ">=", value: 120 }
+        - { fact: symptoms, op: contains_any, value: [severe_headache, vision_change, dizziness, palpitations] }
+    suggested_action: Call immediately; consider emergency assessment.
+    patient_template: emergency_advice
+    rationale: Placeholder rule for a severe BP elevation together with neurological or cardiac warning symptoms.
+    clinician_review: required
+
+  - id: R-BP-CRISIS-01
+    family: bp_high
+    title: Severely high BP reading
+    severity: HIGH
+    when:
+      any:
+        - { fact: bp_sys_latest, op: ">=", value: 180 }
+        - { fact: bp_dia_latest, op: ">=", value: 120 }
+    suggested_action: Call within 4 hours; ask about symptoms; review medicines.
+    patient_template: escalate_notified
+    rationale: Placeholder severe-elevation threshold (180 / 120 mmHg).
+    clinician_review: required
+
+  - id: R-BP-HIGH-01
+    family: bp_high
+    title: High BP reading
+    severity: MEDIUM
+    when:
+      any:
+        - { fact: bp_sys_latest, op: ">=", value: 160 }
+        - { fact: bp_dia_latest, op: ">=", value: 100 }
+    suggested_action: Review within 24 hours.
+    patient_template: escalate_notified
+    rationale: Placeholder elevated BP threshold (160 / 100 mmHg).
+    clinician_review: required
+
+  - id: R-BP-LOW-02
+    family: bp_low
+    title: Low BP with dizziness
+    severity: HIGH
+    when:
+      all:
+        - { fact: bp_sys_latest, op: "<", value: 90 }
+        - { fact: symptoms, op: contains_any, value: [dizziness, fainting] }
+    suggested_action: Call within 4 hours; review BP medicines.
+    patient_template: escalate_notified
+    rationale: Placeholder rule for low systolic BP with symptoms of poor perfusion.
+    clinician_review: required
+
+  - id: R-BP-LOW-01
+    family: bp_low
+    title: Low BP reading
+    severity: MEDIUM
+    when: { fact: bp_sys_latest, op: "<", value: 90 }
+    suggested_action: Review within 24 hours.
+    patient_template: escalate_notified
+    rationale: Placeholder low systolic threshold (below 90 mmHg).
+    clinician_review: required
+
+  # ---------- Adherence ----------
+  - id: R-ADH-02
+    family: adherence
+    title: Critical medicines missed 3 or more days
+    severity: HIGH
+    when: { fact: max_missed_streak_critical, op: ">=", value: 3 }
+    suggested_action: Call within 4 hours; explore barriers (side effects, cost, belief).
+    patient_template: escalate_notified
+    rationale: Sustained non-adherence to critical medicines is a leading, modifiable readmission risk.
+    clinician_review: required
+
+  - id: R-ADH-01
+    family: adherence
+    title: Critical medicines missed 2 days running
+    severity: MEDIUM
+    when: { fact: max_missed_streak_critical, op: ">=", value: 2 }
+    suggested_action: Review within 24 hours; consider a phone call.
+    patient_template: escalate_notified
+    rationale: Early non-adherence signal; intervene before it becomes a pattern.
+    clinician_review: required
+
+  # ---------- No response ----------
+  - id: R-NORESP-02
+    family: no_response
+    title: No reply to 4 or more check-ins
+    severity: HIGH
+    when: { fact: consecutive_no_response, op: ">=", value: 4 }
+    suggested_action: Call within 4 hours or arrange a health-worker visit.
+    patient_template: escalate_notified
+    rationale: Prolonged silence may mean the patient is unwell or has lost access to the phone.
+    clinician_review: required
+
+  - id: R-NORESP-01
+    family: no_response
+    title: No reply to 2 check-ins
+    severity: MEDIUM
+    when: { fact: consecutive_no_response, op: ">=", value: 2 }
+    suggested_action: Try a phone call within 24 hours.
+    patient_template: escalate_notified
+    rationale: Early disengagement signal.
+    clinician_review: required
+
+  # ---------- Swelling ----------
+  - id: R-COMBO-01
+    family: swelling
+    title: Leg swelling with repeated missed doses
+    severity: HIGH
+    when:
+      all:
+        - { fact: symptoms, op: contains_any, value: [leg_swelling] }
+        - { fact: max_missed_streak_critical, op: ">=", value: 2 }
+    suggested_action: Call within 4 hours.
+    patient_template: escalate_notified
+    rationale: New swelling together with missed critical medicines needs clinician review. The system does not interpret the cause.
+    clinician_review: required
+
+  - id: R-SWELL-01
+    family: swelling
+    title: Leg swelling reported
+    severity: MEDIUM
+    when: { fact: symptoms, op: contains_any, value: [leg_swelling] }
+    suggested_action: Review within 24 hours.
+    patient_template: escalate_notified
+    rationale: Swelling can have several causes; flag for clinician review without interpretation.
+    clinician_review: required
+
+  # ---------- Diabetic foot ----------
+  - id: R-FOOT-01
+    family: foot
+    title: Foot wound in a patient with diabetes
+    severity: MEDIUM
+    when:
+      all:
+        - { fact: symptoms, op: contains_any, value: [foot_wound] }
+        - { fact: conditions, op: contains_any, value: [diabetes] }
+    suggested_action: Review within 24 hours; consider early foot assessment.
+    patient_template: escalate_notified
+    rationale: Foot wounds in people with diabetes can deteriorate quickly.
+    clinician_review: required
+
+  # ---------- Other symptoms ----------
+  - id: R-SYM-GEN-01
+    family: other_symptom_moderate
+    title: Concerning non-critical symptom
+    severity: MEDIUM
+    when: { fact: symptoms, op: contains_any, value: [severe_headache, vision_change, palpitations, reduced_urine, nausea_vomiting] }
+    suggested_action: Review within 24 hours.
+    patient_template: escalate_notified
+    rationale: Symptoms that merit clinician review but are not on the critical list.
+    clinician_review: required
+
+  - id: R-SYM-GEN-02
+    family: other_symptom_low
+    title: Minor symptom reported
+    severity: LOW
+    when: { fact: symptoms, op: contains_any, value: [dizziness, excessive_thirst, frequent_urination, fatigue, fever] }
+    suggested_action: Review within 3 days.
+    patient_template: escalate_notified
+    rationale: Low-priority symptom log for context at the next review.
+    clinician_review: required
+
+  # ---------- Safety nets ----------
+  - id: R-UNCLEAR-01
+    family: needs_review
+    title: Message needs human review
+    severity: LOW
+    when:
+      any:
+        - { fact: needs_human, op: is_true }
+        - { fact: intent_confidence_min, op: "<", value: 0.6 }
+    suggested_action: Read the message and reply or call if needed.
+    patient_template: unclear_ask_again
+    rationale: The system was not confident it understood; route to a human (SR-2).
+    clinician_review: required
+
+  - id: R-QUESTION-01
+    family: question
+    title: Patient asked a medical question
+    severity: LOW
+    when: { fact: medical_question, op: is_true }
+    suggested_action: Answer the patient's question or call.
+    patient_template: medical_question_defer
+    rationale: The assistant never answers medical questions (SR-3).
+    clinician_review: required

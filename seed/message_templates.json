@@ -1,0 +1,157 @@
+{
+  "_meta": {
+    "status": "DRAFT",
+    "note": "Telugu and Hindi strings are drafts written for the prototype. A native speaker and a clinician must review every entry marked clinical:true before real use. Placeholders in {braces} must be preserved.",
+    "languages": ["en", "te", "hi"]
+  },
+  "templates": {
+    "disclaimer_intro": {
+      "clinical": true,
+      "en": "I am Setu, an automated assistant. I am not a doctor. In an emergency call 108.",
+      "te": "నేను సేతు, ఒక ఆటోమేటెడ్ సహాయకుడిని. నేను డాక్టర్‌ని కాదు. అత్యవసర పరిస్థితిలో 108 కి కాల్ చేయండి.",
+      "hi": "मैं सेतु हूँ, एक स्वचालित सहायक। मैं डॉक्टर नहीं हूँ। आपातकाल में 108 पर कॉल करें।"
+    },
+    "greeting_morning": {
+      "clinical": false,
+      "en": "Good morning {name}! This is Setu from {clinic}. Let's do today's quick check-in.",
+      "te": "శుభోదయం {name} గారు! నేను {clinic} నుంచి సేతు. ఈ రోజు చిన్న చెక్-ఇన్ చేద్దాం.",
+      "hi": "सुप्रभात {name} जी! मैं {clinic} से सेतु हूँ। चलिए आज का छोटा चेक-इन करें।"
+    },
+    "greeting_evening": {
+      "clinical": false,
+      "en": "Good evening {name}! This is Setu. Time for the evening check-in.",
+      "te": "శుభ సాయంత్రం {name} గారు! నేను సేతు. సాయంత్రం చెక్-ఇన్ సమయం అయింది.",
+      "hi": "शुभ संध्या {name} जी! मैं सेतु हूँ। शाम के चेक-इन का समय हो गया है।"
+    },
+    "ask_meds_morning": {
+      "clinical": false,
+      "en": "Did you take your morning tablets today ({med_list})?",
+      "te": "ఈ రోజు ఉదయం మాత్రలు ({med_list}) వేసుకున్నారా?",
+      "hi": "क्या आपने आज सुबह की दवाइयाँ ({med_list}) ले ली हैं?"
+    },
+    "ask_meds_evening": {
+      "clinical": false,
+      "en": "Did you take your evening and bedtime tablets ({med_list})?",
+      "te": "సాయంత్రం మరియు రాత్రి మాత్రలు ({med_list}) వేసుకున్నారా?",
+      "hi": "क्या आपने शाम और रात की दवाइयाँ ({med_list}) ले ली हैं?"
+    },
+    "ask_glucose": {
+      "clinical": false,
+      "en": "If you checked your sugar this morning, please tell me the reading.",
+      "te": "ఈ ఉదయం షుగర్ చెక్ చేసి ఉంటే, రీడింగ్ చెప్పండి.",
+      "hi": "अगर आपने आज सुबह शुगर जाँची है, तो रीडिंग बताइए।"
+    },
+    "ask_bp": {
+      "clinical": false,
+      "en": "If you checked your blood pressure, please tell me the reading (for example 130/80).",
+      "te": "బీపీ చెక్ చేసి ఉంటే, రీడింగ్ చెప్పండి (ఉదా: 130/80).",
+      "hi": "अगर आपने बीपी जाँचा है, तो रीडिंग बताइए (जैसे 130/80)।"
+    },
+    "ask_symptoms": {
+      "clinical": false,
+      "en": "Any problems today, like swelling, dizziness, chest pain or breathlessness?",
+      "te": "ఈ రోజు ఏదైనా ఇబ్బంది ఉందా? ఉదాహరణకు కాళ్ళ వాపు, కళ్ళు తిరగడం, ఛాతీ నొప్పి, ఊపిరి ఆడకపోవడం?",
+      "hi": "आज कोई तकलीफ़ है? जैसे सूजन, चक्कर, सीने में दर्द या साँस फूलना?"
+    },
+    "ask_meal_dinner": {
+      "clinical": false,
+      "en": "What did you eat for dinner today?",
+      "te": "ఈ రోజు రాత్రి భోజనంలో ఏం తిన్నారు?",
+      "hi": "आज रात के खाने में आपने क्या खाया?"
+    },
+    "ack_taken": {
+      "clinical": false,
+      "en": "Great, thank you! Taking medicines regularly helps keep you safe.",
+      "te": "చాలా మంచిది, ధన్యవాదాలు! మాత్రలు క్రమం తప్పకుండా వేసుకోవడం మీ ఆరోగ్యానికి రక్షణ.",
+      "hi": "बहुत अच्छा, धन्यवाद! दवाइयाँ नियमित लेना आपको सुरक्षित रखता है।"
+    },
+    "ack_missed_gentle": {
+      "clinical": true,
+      "en": "Thanks for telling me. Please do not stop your medicines even if you feel well. Your care team will be informed.",
+      "te": "చెప్పినందుకు ధన్యవాదాలు. బాగున్నా మాత్రలు ఆపకండి. మీ కేర్ టీమ్‌కు తెలియజేస్తాను.",
+      "hi": "बताने के लिए धन्यवाद। ठीक महसूस करने पर भी दवाइयाँ बंद न करें। आपकी केयर टीम को सूचित कर दिया जाएगा।"
+    },
+    "ack_vital": {
+      "clinical": false,
+      "en": "Thank you, I have noted your {vital} reading: {value}.",
+      "te": "ధన్యవాదాలు, మీ {vital} రీడింగ్ {value} నమోదు చేశాను.",
+      "hi": "धन्यवाद, आपकी {vital} रीडिंग {value} दर्ज कर ली है।"
+    },
+    "escalate_notified": {
+      "clinical": true,
+      "en": "I have informed your doctor. Someone from the care team will contact you soon.",
+      "te": "మీ డాక్టర్ గారికి తెలియజేశాను. కేర్ టీమ్ నుంచి త్వరలో మిమ్మల్ని సంప్రదిస్తారు.",
+      "hi": "आपके डॉक्टर को सूचित कर दिया गया है। केयर टीम से जल्द ही कोई आपसे संपर्क करेगा।"
+    },
+    "emergency_advice": {
+      "clinical": true,
+      "en": "This could be serious. Please call 108 or go to the nearest hospital now. I am informing your doctor.",
+      "te": "ఇది తీవ్రమైనది కావచ్చు. వెంటనే 108 కి కాల్ చేయండి లేదా దగ్గరలోని ఆసుపత్రికి వెళ్లండి. మీ డాక్టర్ గారికి తెలియజేస్తున్నాను.",
+      "hi": "यह गंभीर हो सकता है। कृपया तुरंत 108 पर कॉल करें या नज़दीकी अस्पताल जाएँ। आपके डॉक्टर को सूचित किया जा रहा है।"
+    },
+    "glucose_low_advice": {
+      "clinical": true,
+      "en": "Your sugar reading is low. If you feel shaky, sweaty or confused, call 108 now. Your doctor is being informed right away.",
+      "te": "మీ షుగర్ తక్కువగా ఉంది. వణుకు, చెమటలు లేదా గందరగోళంగా అనిపిస్తే వెంటనే 108 కి కాల్ చేయండి. మీ డాక్టర్ గారికి వెంటనే తెలియజేస్తున్నాను.",
+      "hi": "आपकी शुगर कम है। अगर काँपना, पसीना या घबराहट हो तो तुरंत 108 पर कॉल करें। आपके डॉक्टर को तुरंत सूचित किया जा रहा है।"
+    },
+    "medical_question_defer": {
+      "clinical": true,
+      "en": "That is a good question for your doctor. I have passed it to your care team.",
+      "te": "ఇది డాక్టర్ గారిని అడగాల్సిన ప్రశ్న. మీ కేర్ టీమ్‌కు పంపించాను.",
+      "hi": "यह सवाल डॉक्टर से पूछने लायक है। मैंने इसे आपकी केयर टीम तक पहुँचा दिया है।"
+    },
+    "unclear_ask_again": {
+      "clinical": false,
+      "en": "Sorry, I did not understand. Could you reply with a short answer or tap a button?",
+      "te": "క్షమించండి, నాకు అర్థం కాలేదు. చిన్నగా సమాధానం ఇవ్వండి లేదా బటన్ నొక్కండి.",
+      "hi": "क्षमा करें, मुझे समझ नहीं आया। कृपया छोटा जवाब दें या बटन दबाएँ।"
+    },
+    "meal_feedback_good": {
+      "clinical": false,
+      "en": "That sounds like a good choice: {foods}.",
+      "te": "ఇది మంచి ఎంపిక: {foods}.",
+      "hi": "यह अच्छा विकल्प है: {foods}।"
+    },
+    "meal_feedback_limit": {
+      "clinical": false,
+      "en": "{foods} can raise sugar or blood pressure. A smaller portion with vegetables or dal is a better choice.",
+      "te": "{foods} షుగర్ లేదా బీపీని పెంచవచ్చు. తక్కువ పరిమాణంలో, కూరగాయలు లేదా పప్పుతో తీసుకోవడం మంచిది.",
+      "hi": "{foods} शुगर या बीपी बढ़ा सकते हैं। कम मात्रा में, सब्ज़ी या दाल के साथ लेना बेहतर है।"
+    },
+    "nutrition_tip_swap": {
+      "clinical": false,
+      "en": "Food idea for today: instead of {limit_food}, try {prefer_food}.",
+      "te": "ఈ రోజు ఆహార సూచన: {limit_food} బదులు {prefer_food} తీసుకోండి.",
+      "hi": "आज का आहार सुझाव: {limit_food} की जगह {prefer_food} लें।"
+    },
+    "nutrition_tip_add": {
+      "clinical": false,
+      "en": "Food idea for today: add {prefer_food} to your meal.",
+      "te": "ఈ రోజు ఆహార సూచన: మీ భోజనంలో {prefer_food} చేర్చండి.",
+      "hi": "आज का आहार सुझाव: अपने भोजन में {prefer_food} शामिल करें।"
+    },
+    "closing": {
+      "clinical": false,
+      "en": "Thank you! I will check in again this evening. Take care.",
+      "te": "ధన్యవాదాలు! సాయంత్రం మళ్ళీ మాట్లాడతాను. జాగ్రత్తగా ఉండండి.",
+      "hi": "धन्यवाद! शाम को फिर बात करेंगे। अपना ध्यान रखिए।"
+    }
+  },
+  "quick_replies": {
+    "yes_taken":   { "en": "Yes, taken",       "te": "అవును, వేసుకున్నాను", "hi": "हाँ, ले ली" },
+    "not_taken":   { "en": "No, not taken",    "te": "లేదు, వేసుకోలేదు",    "hi": "नहीं, नहीं ली" },
+    "no_symptoms": { "en": "No problems",      "te": "ఏ ఇబ్బంది లేదు",       "hi": "कोई तकलीफ़ नहीं" },
+    "have_symptom":{ "en": "I have a problem", "te": "ఇబ్బంది ఉంది",         "hi": "तकलीफ़ है" },
+    "skip":        { "en": "Skip",             "te": "తర్వాత",              "hi": "बाद में" }
+  },
+  "check_in_sequences": {
+    "morning": ["greeting_morning", "ask_meds_morning", "ask_glucose", "ask_bp", "ask_symptoms"],
+    "evening": ["greeting_evening", "ask_meds_evening", "ask_meal_dinner", "ask_symptoms"]
+  },
+  "validator_denylist": {
+    "en": ["diagnos", "you have", "you are suffering", "increase your dose", "reduce your dose", "stop taking"],
+    "te": ["నిర్ధారణ", "మీకు ఉంది"],
+    "hi": ["निदान", "आपको है"]
+  }
+}

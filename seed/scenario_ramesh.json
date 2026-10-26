@@ -1,0 +1,39 @@
+{
+  "_meta": {
+    "patient_id": "P001",
+    "note": "History days 1-7 are pre-seeded by POST /demo/seed. 'live_steps' are scripted patient messages applied one by one by POST /demo/scenario-step (or typed live by the presenter). Day numbering is days since discharge (2026-10-18).",
+    "clock_at_start": "2026-10-26T03:00:00Z"
+  },
+  "history": [
+    { "day": 1, "meds": "all_taken", "glucose": 142, "bp": [136, 86], "meal": "idli, sambar", "note": "Good start" },
+    { "day": 2, "meds": "all_taken", "glucose": 138, "bp": [134, 84], "meal": "pesarattu" },
+    { "day": 3, "meds": "all_taken", "glucose": 151, "bp": [138, 88], "note": "Said he feels fine" },
+    { "day": 4, "meds": "all_taken", "glucose": 147, "bp": [140, 88] },
+    { "day": 5, "meds": "all_taken", "glucose": 155, "bp": [142, 90], "meal": "rice, avakaya", "note": "Meal feedback sent about pickle" },
+    { "day": 6, "meds": "all_taken", "glucose": 149, "bp": [138, 86] },
+    { "day": 7, "meds": { "metformin": "taken", "glimepiride": "missed", "amlodipine": "taken", "telmisartan": "taken", "atorvastatin": "taken" }, "glucose": 158, "bp": [142, 90], "note": "Skipped glimepiride (feels fine) -> missed streak = 1, no alert yet" }
+  ],
+  "live_steps": [
+    {
+      "step": 1, "day": 8, "time": "08:00 IST", "actor": "system",
+      "event": "Morning check-in sent in Telugu (greeting, medicines with quick replies, glucose, BP, symptoms)",
+      "expect": { "alerts_created": 0 }
+    },
+    {
+      "step": 2, "actor": "patient", "quick_reply": "not_taken", "text": "లేదు, ఈ రోజు బాగానే ఉన్నాను.", "text_en": "No, I'm feeling fine today.",
+      "expect": { "missed_streak": 2, "alerts": ["R-ADH-01 MEDIUM"], "reply_keys": ["ack_missed_gentle", "escalate_notified"] }
+    },
+    {
+      "step": 3, "actor": "patient", "text": "కాళ్ళు కొంచెం వాచాయి.", "text_en": "My feet are a bit swollen.",
+      "expect": { "alerts": ["R-COMBO-01 HIGH, contributing_rules=[R-ADH-01]; the earlier MEDIUM alert is merged into it"], "reply_keys": ["escalate_notified"], "console": "One HIGH alert with two flags appears via SSE within 2 seconds" }
+    },
+    {
+      "step": 4, "actor": "clinician", "action": "Open alert A-xxxx, read summary and quoted evidence, click 'Approve call'",
+      "expect": { "alert_status": "acknowledged", "audit_entries": ["call_approved"] }
+    },
+    {
+      "step": 5, "actor": "patient", "text": "ఛాతీలో నొప్పిగా ఉంది", "text_en": "I have chest pain", "optional": true,
+      "expect": { "alerts": ["R-CRIT-SYM-01 CRITICAL"], "reply_keys": ["emergency_advice"], "note": "Use only if the jury asks about emergencies" }
+    }
+  ]
+}
