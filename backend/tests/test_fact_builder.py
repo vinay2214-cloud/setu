@@ -78,3 +78,9 @@ def test_missed_medication_phrases_never_become_taken():
     conflict = extractor.extract("I took it", "en", quick_reply="not_taken")
     assert conflict["medication_events"][0]["status"] == "missed"
     assert conflict["needs_human"] is True
+
+
+def test_no_symptoms_quick_reply_is_explicit_negative():
+    result = IntentExtractor().extract("No symptoms", "en", "no_symptoms")
+    assert not result["needs_human"]
+    assert result["symptoms"] == []

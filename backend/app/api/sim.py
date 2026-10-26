@@ -69,13 +69,26 @@ def create_session(payload: SimSessionRequest) -> dict:
                     "patient": payload.patient_id,
                     "language": lang,
                     "text": render_template("disclaimer_intro", lang),
-                    "english": "I am Setu, an automated assistant. I am not a doctor. In an emergency call 108.",
+                    "english": render_template("disclaimer_intro", "en"),
                     "at": now().isoformat().replace("+00:00", "Z"),
                 },
             )
     token = secrets.token_urlsafe(24)
     _sessions[token] = payload.patient_id
-    return {"token": token, "patient": dict(patient)}
+    with engine.connect() as connection:
+        rows = (
+            connection.execute(
+                text(
+                    "SELECT * FROM messages WHERE patient_id=:p ORDER BY created_at DESC,id DESC LIMIT 100"
+                ),
+                {"p": payload.patient_id},
+            )
+            .mappings()
+            .all()
+        )
+    history = [_message_payload(dict(row)) for row in reversed(rows)]
+    history.sort(key=lambda message: message["template_key"] != "disclaimer_intro")
+    return {"token": token, "patient": dict(patient), "messages": history}
 
 
 @router.post("/messages")

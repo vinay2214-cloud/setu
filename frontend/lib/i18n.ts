@@ -1,0 +1,6 @@
+export const ui = {
+  en: { message: "Type a message…", send: "Send", taken: "Yes, taken", missed: "Not taken", okay: "No symptoms", typing: "Setu is typing…", english: "Show English", language: "Chat language", understood: "What Setu understood", pending: "Send a message to inspect extracted facts and deterministic rules.", title: "Care companion", failed: "Could not send. Try again.", demo: "Simulator · synthetic data only" },
+  te: { message: "మీ సందేశం రాయండి…", send: "పంపండి", taken: "అవును, వేసుకున్నాను", missed: "లేదు", okay: "లక్షణాలు లేవు", typing: "సేతు రాస్తోంది…", english: "ఆంగ్లం చూపించు", language: "సంభాషణ భాష", understood: "What Setu understood", pending: "Send a message to inspect extracted facts and deterministic rules.", title: "కేర్ సహాయకుడు", failed: "పంపలేకపోయాము. మళ్ళీ ప్రయత్నించండి.", demo: "సిమ్యులేటర్ · కల్పిత డేటా" },
+  hi: { message: "संदेश लिखें…", send: "भेजें", taken: "हाँ, दवा ली", missed: "नहीं ली", okay: "कोई लक्षण नहीं", typing: "सेतु लिख रहा है…", english: "अंग्रेज़ी दिखाएँ", language: "बातचीत की भाषा", understood: "What Setu understood", pending: "Send a message to inspect extracted facts and deterministic rules.", title: "देखभाल साथी", failed: "संदेश नहीं भेजा जा सका। दोबारा कोशिश करें।", demo: "सिम्युलेटर · काल्पनिक डेटा" },
+} as const;
+export type Language = keyof typeof ui;

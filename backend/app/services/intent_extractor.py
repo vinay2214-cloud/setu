@@ -253,6 +253,9 @@ class IntentExtractor:
             intents.append("vital_report")
         if medical_question:
             intents.append("question")
+        if quick_reply == "no_symptoms" and not symptoms:
+            intents.append("symptom_report")
+            needs_human = False
         if not intents:
             intents.append("other")
             needs_human = True
