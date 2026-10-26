@@ -10,7 +10,12 @@ DENYLIST = TEMPLATE_DATA["validator_denylist"]
 
 
 def validate_reply(
-    text: str, language: str, *, allowed_meds: set[str] | None = None, template_key: str = ""
+    text: str,
+    language: str,
+    *,
+    allowed_meds: set[str] | None = None,
+    template_key: str = "",
+    values: dict[str, str] | None = None,
 ) -> bool:
     if template_key in TEMPLATES and language in {"en", "te", "hi"}:
         approved = TEMPLATES[template_key][language]
@@ -37,6 +42,10 @@ def validate_reply(
     script_text = text
     for med in allowed_meds or set():
         script_text = script_text.replace(med, "")
+    # Substituted values (patient name, clinic name, medicine list) may legitimately be
+    # in Latin script inside a Telugu/Hindi sentence; judge the script of the template only.
+    for value in sorted((str(v) for v in (values or {}).values() if v), key=len, reverse=True):
+        script_text = script_text.replace(value, "")
     if language == "te":
         letters = [c for c in script_text if c.isalpha()]
         if letters and sum("\u0c00" <= c <= "\u0c7f" for c in letters) / len(letters) < 0.6:
@@ -59,7 +68,9 @@ def render_template(
         key = "unclear_ask_again"
     template = TEMPLATES[key].get(language) or TEMPLATES[key]["en"]
     rendered = template.format_map(defaultdict(str, values or {}))
-    if not validate_reply(rendered, language, template_key=key, allowed_meds=allowed_meds):
+    if not validate_reply(
+        rendered, language, template_key=key, allowed_meds=allowed_meds, values=values
+    ):
         # Approved clinical copy is fixed; validator failure falls back to a
         # fixed, localized review prompt, never generated text.
         key = "unclear_ask_again"

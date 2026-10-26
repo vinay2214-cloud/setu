@@ -267,7 +267,7 @@ def patient_messages(patient_id: str, limit: int = 50, cursor: str | None = None
     with engine.connect() as connection:
         page = _query_page(
             connection,
-            "SELECT * FROM messages WHERE patient_id=:id ORDER BY created_at,id",
+            "SELECT * FROM messages WHERE patient_id=:id ORDER BY created_at,rowid",
             {"id": patient_id},
             limit,
             cursor,

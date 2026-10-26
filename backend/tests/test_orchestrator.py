@@ -86,3 +86,18 @@ def test_future_pending_checkins_do_not_hide_missed_streak(seeded_client):
         facts = build_facts(connection, "P001", now())
         assert facts["consecutive_no_response"] == 7
         assert facts["needs_human"] is False
+
+
+def test_checkin_messages_keep_sequence_order(seeded_client):
+    sent = seeded_client.post(
+        "/api/v1/demo/check-in", json={"patient_id": "P001", "kind": "morning"}
+    )
+    assert sent.status_code == 200
+    expected = ["greeting_morning", "ask_meds_morning", "ask_glucose", "ask_symptoms"]
+    keys = [m["template_key"] for m in sent.json()["messages"]]
+    assert keys[:4] == expected
+    stored = seeded_client.get("/api/v1/patients/P001/messages").json()
+    items = stored["items"] if isinstance(stored, dict) else stored
+    assert [m["template_key"] for m in items[-len(keys) :]] == keys
+    greeting = next(m for m in items if m["template_key"] == "greeting_morning")
+    assert "సేతు" in greeting["text"]  # the real greeting, not the "did not understand" fallback

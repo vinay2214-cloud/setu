@@ -79,7 +79,7 @@ def create_session(payload: SimSessionRequest) -> dict:
         rows = (
             connection.execute(
                 text(
-                    "SELECT * FROM messages WHERE patient_id=:p ORDER BY created_at DESC,id DESC LIMIT 100"
+                    "SELECT * FROM messages WHERE patient_id=:p ORDER BY created_at DESC,rowid DESC LIMIT 100"
                 ),
                 {"p": payload.patient_id},
             )
@@ -137,7 +137,9 @@ def poll_messages(
             )
         after_row = (
             connection.execute(
-                text("SELECT created_at,id FROM messages WHERE id=:id AND patient_id=:patient"),
+                text(
+                    "SELECT created_at,rowid AS rid FROM messages WHERE id=:id AND patient_id=:patient"
+                ),
                 {"id": after, "patient": patient_id},
             )
             .mappings()
@@ -150,13 +152,13 @@ def poll_messages(
                 text(
                     "SELECT * FROM messages WHERE patient_id=:patient AND direction='out' "
                     "AND (:after_time IS NULL OR created_at>:after_time OR "
-                    "(created_at=:after_time AND id>:after_id)) "
-                    "ORDER BY created_at,id LIMIT :limit"
+                    "(created_at=:after_time AND rowid>:after_rid)) "
+                    "ORDER BY created_at,rowid LIMIT :limit"
                 ),
                 {
                     "patient": patient_id,
                     "after_time": after_row["created_at"] if after_row else None,
-                    "after_id": after_row["id"] if after_row else None,
+                    "after_rid": after_row["rid"] if after_row else None,
                     "limit": page_size + 1,
                 },
             )

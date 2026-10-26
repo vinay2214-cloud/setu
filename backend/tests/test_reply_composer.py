@@ -35,3 +35,23 @@ def test_unsafe_reply_strings_are_rejected(unsafe):
 
 def test_fixed_emergency_template_keeps_108():
     assert "108" in render_template("emergency_advice", "te")
+
+
+def test_telugu_greeting_with_latin_name_is_not_replaced_by_fallback():
+    from app.services.reply_composer import TEMPLATES, render_template
+
+    text = render_template(
+        "greeting_morning", "te", {"name": "Ramesh Kumar", "clinic": "Demo Clinic"}
+    )
+    assert text != TEMPLATES["unclear_ask_again"]["te"]
+    assert "Ramesh Kumar" in text and "సేతు" in text
+
+
+def test_hindi_greeting_with_latin_name_is_not_replaced_by_fallback():
+    from app.services.reply_composer import TEMPLATES, render_template
+
+    text = render_template(
+        "greeting_morning", "hi", {"name": "Suresh Patel", "clinic": "Demo Clinic"}
+    )
+    assert text != TEMPLATES["unclear_ask_again"]["hi"]
+    assert "Suresh Patel" in text
