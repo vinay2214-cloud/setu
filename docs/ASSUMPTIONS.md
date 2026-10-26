@@ -4,6 +4,7 @@ Add a line whenever you assume something, resolve a doc conflict, or reuse outsi
 
 | Date | Area | Assumption / decision | Why | Owner |
 |---|---|---|---|---|
+| 2026-10-26 | Source doses | The sample expected plan expands BD/OD/HS into new words. Compiler uses the verbatim dose portion of the source line, with verified offsets; source wording takes priority | SR-6 and docs/07 forbid dose rewriting | Codex |
 | 2026-10-26 | Simulator idempotency | Persist the original `/sim/messages` response snapshot on the inbound message, add the column at startup on SQLite/PostgreSQL, and snapshot a best-effort reconstruction on the first replay of a legacy message | Duplicate POSTs must not rerun extraction or return a different alert snapshot after later events | Codex |
 | 2026-10-26 | Demo alerts | P002/P003/P005 are seeded as open, rule-backed alerts from their fixture summaries; where no original message exists, `evidence_json` stays empty and the audit entry records the fixture reference and an empty `source_message_ids` list | Preserves provenance without inventing patient messages | Codex |
 | 2026-10-26 | Mock extraction | P2 uses deterministic keyword and numeric patterns for the offline provider; unsupported language forms become `needs_human`, and critical recall is gated against the checked-in evaluation utterances | Keeps offline behavior predictable while real-provider support remains optional | Codex |

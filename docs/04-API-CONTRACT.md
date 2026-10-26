@@ -74,7 +74,7 @@ Codes: `validation_error` (422), `not_found` (404), `unauthorized` (401), `forbi
 | POST | `/patients/{id}/documents` | `{ "kind": "discharge_summary", "text": "..." }` → `201 { id }` |
 | POST | `/patients/{id}/care-plans/draft` | `{ "document_id" }` → `201 CarePlan(status=draft)` (runs PlanCompiler) |
 | GET | `/care-plans/{id}` | Includes `source_text` and spans |
-| PATCH | `/care-plans/{id}` | Clinician edits `plan` JSON → new version |
+| PATCH | `/care-plans/{id}` | `{ "plan": CarePlanJson, "expected_version": 1 }` → new draft version; stale version returns 409 |
 | POST | `/care-plans/{id}/approve` | `{ "note": "" }` → status `approved` |
 | POST | `/care-plans/{id}/activate` | Requires approved; creates schedule → `active` |
 | GET | `/patients/{id}/care-plans` | Versions list |
@@ -89,11 +89,13 @@ Codes: `validation_error` (422), `not_found` (404), `unauthorized` (401), `forbi
 }
 ```
 
+`GET /demo/sample-summary` returns `{text}` for the synthetic intake sample. Care plan responses include `source_text`, `activated_at`, and `warnings`. Only the latest plan version may be approved or activated. Every edit returns to draft.
+
 ## 6. Simulator and messaging
 
 | Method | Path | Notes |
 |---|---|---|
-| POST | `/sim/session` | `{ "patient_id" }` → `{ "token", "patient": {id, name, language} }`; requires consent and persists the fixed disclaimer once |
+| POST | `/sim/session` | `{ "patient_id" }` → `{ "token", "patient": {id, name, language}, "messages": [Message] }`; requires consent and persists the fixed disclaimer once; includes up to 100 recent messages for simulator history |
 | POST | `/sim/messages` | Header `X-Sim-Token`; `{ "patient_id", "client_msg_id", "text", "language", "quick_reply" }`; duplicate `client_msg_id` returns the exact original response snapshot |
 | GET | `/sim/messages?patient_id=P001&after=<msg_id>&limit=50` | Header `X-Sim-Token`; poll up to 100 outbound messages; response includes `next_after` when more remain |
 | GET | `/sim/stream?patient_id=P001` | Header `X-Sim-Token`; patient-scoped SSE (`message.created`) |

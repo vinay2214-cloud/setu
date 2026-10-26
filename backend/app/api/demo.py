@@ -49,3 +49,11 @@ def state() -> dict:
         "speech_provider": settings.speech_provider,
         "channel": settings.channel_adapter,
     }
+
+
+@router.get("/sample-summary")
+def sample_summary() -> dict:
+    from app.seed_loader import SEED
+
+    _enabled()
+    return {"text": (SEED / "discharge_summary_ramesh.txt").read_text()}

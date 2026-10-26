@@ -9,6 +9,10 @@ class MockLLMProvider:
             from app.services.intent_extractor import IntentExtractor
 
             return IntentExtractor().extract(text, language or "en")
+        if task == "plan":
+            from app.services.plan_compiler import canned_plan
+
+            return canned_plan(text, language or "en")
         if task == "summary":
             return {"summary": "A synthetic patient update is available for clinician review."}
         return {"needs_review": True, "warnings": ["Mock provider has no result for this task."]}
