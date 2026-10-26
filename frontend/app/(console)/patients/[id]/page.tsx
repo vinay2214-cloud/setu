@@ -7,6 +7,7 @@ import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 import { z } from "zod";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
+import { PlanSchema, type CarePlan } from "@/lib/plans";
 import { AlertSchema, PageSchema, PatientSchema, type Alert, type Patient } from "@/lib/schemas";
 import { SeverityBadge } from "@/components/setu/severity-badge";
 
@@ -30,6 +31,8 @@ type Tab = (typeof tabs)[number];
 export default function PatientDetailPage() {
   const params = useParams<{ id: string }>();
   const patientId = params.id;
+  const [plans, setPlans] = useState<CarePlan[]>([]);
+  const [showEnglish, setShowEnglish] = useState(true);
   const [patient, setPatient] = useState<Patient | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [messages, setMessages] = useState<z.infer<typeof MessageSchema>[]>([]);
@@ -42,16 +45,17 @@ export default function PatientDetailPage() {
   const load = useCallback(async () => {
     setLoading(true); setError("");
     try {
-      const [p, alertPage, messagePage, vitalPage, timelinePage, adherencePage] = await Promise.all([
+      const [p, alertPage, messagePage, vitalPage, timelinePage, adherencePage, planPage] = await Promise.all([
         api(`/patients/${patientId}`, PatientSchema),
         api(`/alerts?patient_id=${encodeURIComponent(patientId)}&status=open,acknowledged,resolved`, PageSchema(AlertSchema)),
         api(`/patients/${patientId}/messages?limit=100`, PageSchema(MessageSchema)),
         api(`/patients/${patientId}/vitals?type=glucose&days=90&limit=100`, ObservationPageSchema),
         api(`/patients/${patientId}/timeline?limit=100`, TimelinePageSchema),
         api(`/patients/${patientId}/adherence?days=14&limit=100`, AdherencePageSchema),
+        api(`/patients/${patientId}/care-plans`, z.object({ items: z.array(PlanSchema) })),
       ]);
       setPatient(p); setAlerts(alertPage.items); setMessages(messagePage.items); setObservations(vitalPage.items);
-      setTimeline(timelinePage.items); setAdherence(adherencePage.items);
+      setPlans(planPage.items); setTimeline(timelinePage.items); setAdherence(adherencePage.items);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not load patient record."); }
     finally { setLoading(false); }
   }, [patientId]);
@@ -86,11 +90,11 @@ export default function PatientDetailPage() {
       </div></div>
       <div className="detail-card"><div className="section-heading"><Activity size={18} /><h2>Recent care timeline</h2></div>{timeline.length ? <ol className="timeline-list">{timeline.slice(0, 8).map((item, index) => <li key={`${item.type}-${item.at}-${index}`}><time>{new Date(item.at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST</time><strong>{item.type.replaceAll("_", " ")}</strong><span>{timelineSummary(item)}</span></li>)}</ol> : <p className="empty-inline">No recent timeline events.</p>}</div>
     </section> : null}
-    {tab === "Conversation" ? <section className="conversation-panel" aria-label="Patient conversation">{messages.length ? messages.map((message) => <article className={`conversation-message ${message.direction === "out" ? "message-out" : "message-in"}`} key={message.id}>
-      <p lang={message.language}>{message.text || "(No text)"}</p>{message.text_en && message.text_en !== message.text ? <p className="translation">{message.text_en}</p> : null}
+    {tab === "Conversation" ? <section className="conversation-panel" aria-label="Patient conversation"><label className="checkbox-label"><input type="checkbox" checked={showEnglish} onChange={e => setShowEnglish(e.target.checked)} />Show English</label>{messages.length ? messages.map((message) => <article className={`conversation-message ${message.direction === "out" ? "message-out" : "message-in"}`} key={message.id}>
+      <p lang={message.language}>{message.text || "(No text)"}</p>{showEnglish && message.text_en && message.text_en !== message.text ? <p className="translation">{message.text_en}</p> : null}
       <footer><time>{new Date(message.created_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST</time><span>{message.direction === "in" ? "Patient" : "Setu · approved template"}</span>{message.template_key ? <span>{message.template_key}</span> : null}</footer>
     </article>) : <div className="empty-state"><MessageSquareText size={28} /><h2>No messages yet</h2></div>}</section> : null}
-    {tab === "Care plan" ? <section className="patient-panel"><div className="detail-card"><div className="section-heading"><ClipboardCheck size={18} /><h2>Current care plan</h2><Link href={`/patients/${patientId}/intake`}>Review / create version →</Link></div>{patient.plan ? <><p>Plan <strong>{patient.plan.id}</strong> · version {patient.plan.version}</p><span className={`plan-status status-${patient.plan.status}`}>{patient.plan.status}</span><p className="muted">Care plan contents are reviewed and maintained by the clinical team.</p></> : <p className="empty-inline">No care plan is recorded for this patient.</p>}</div><div className="review-notice">Plan changes require clinician review and approval before activation.</div></section> : null}
+    {tab === "Care plan" ? <section className="patient-panel"><div className="detail-card"><div className="section-heading"><ClipboardCheck size={18} /><h2>Current care plan</h2><Link href={`/patients/${patientId}/intake`}>Review / create version →</Link></div>{patient.plan ? <><p>Plan <strong>{patient.plan.id}</strong> · version {patient.plan.version}</p><span className={`plan-status status-${patient.plan.status}`}>{patient.plan.status}</span><p className="muted">Care plan contents are reviewed and maintained by the clinical team.</p></> : <p className="empty-inline">No care plan is recorded for this patient.</p>}</div><div className="detail-card"><h2>Version history and plan content</h2>{plans.map(version => <details key={version.id} open={version.status === "active"}><summary>Version {version.version} · {version.status} · {version.id}</summary><p className="muted">Approved by {version.approved_by ?? "Awaiting clinician approval"}{version.approved_at ? ` · ${new Date(version.approved_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST` : ""}</p><pre className="source-document">{JSON.stringify(version.plan, null, 2)}</pre></details>)}</div><div className="review-notice">Plan changes require clinician review and approval before activation.</div></section> : null}
     {tab === "Alerts" ? <section className="alert-history-list">{alerts.length ? alerts.map((alert) => <article className="history-alert" key={alert.id}><div><SeverityBadge severity={alert.severity} /><strong>{alert.title}</strong></div><span>{alert.id} · {alert.status} · {alert.rule.id}</span><time>{new Date(alert.created_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST</time><p>{alert.evidence.length} evidence messages · {alert.events.length} recorded actions</p></article>) : <div className="empty-state"><ShieldAlert size={28} /><h2>No alerts recorded</h2></div>}</section> : null}
     {tab === "Audit" ? <section className="patient-panel"><div className="detail-card"><div className="section-heading"><ShieldAlert size={18} /><h2>Alert audit trail</h2></div>{alerts.flatMap((alert) => alert.events.map((event, index) => ({ ...event, alertId: alert.id, index }))).length ? <ol className="timeline-list">{alerts.flatMap((alert) => alert.events.map((event, index) => ({ ...event, alertId: alert.id, index }))).sort((a, b) => b.at.localeCompare(a.at)).map((event) => <li key={`${event.alertId}-${event.index}`}><time>{new Date(event.at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST</time><strong>{event.action} · {event.alertId}</strong><span>{event.actor}{event.note ? ` · ${event.note}` : ""}</span></li>)}</ol> : <p className="empty-inline">No alert audit events are available.</p>}<p className="muted">This view lists alert actions returned by the audit-backed alert API.</p></div></section> : null}
   </div>;

@@ -12,6 +12,7 @@ const navItems = [
   { href: "/queue", label: "Priority queue", icon: Activity },
   { href: "/patients", label: "Patients", icon: Users },
   { href: "/rules", label: "Rules", icon: ClipboardList },
+  { href: "/demo", label: "Demo controls", icon: Activity },
 ];
 
 export default function ConsoleLayout({ children }: Readonly<{ children: React.ReactNode }>) {

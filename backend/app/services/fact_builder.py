@@ -119,8 +119,9 @@ def build_facts(
     )
     missed = connection.execute(
         text("""SELECT status FROM check_ins WHERE patient_id = :id
+                  AND scheduled_for <= :at AND status != 'pending'
                   ORDER BY scheduled_for DESC LIMIT 20"""),
-        {"id": patient_id},
+        {"id": patient_id, "at": _iso(now)},
     ).mappings()
     consecutive_no_response = 0
     for checkin in missed:
@@ -154,7 +155,9 @@ def build_facts(
         "consecutive_no_response": consecutive_no_response,
         # Missing extraction is uncertain: route it to human review instead of
         # treating absence of evidence as a confident, safe result.
-        "intent_confidence_min": float(intent.get("confidence", 0.0)),
-        "needs_human": bool(intent.get("needs_human", True)),
+        "intent_confidence_min": float(intent.get("confidence", 0.0))
+        if trigger_message_id
+        else 1.0,
+        "needs_human": bool(intent.get("needs_human", True)) if trigger_message_id else False,
         "medical_question": (intent.get("question") or {}).get("category") == "medical",
     }

@@ -37,6 +37,38 @@
         }
       }
     },
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ]
+                  },
+                  "type": "object",
+                  "title": "Response Health Api V1 Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "tags": [
@@ -1733,6 +1765,250 @@
         }
       }
     },
+    "/api/v1/demo/time-travel": {
+      "post": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Time Travel",
+        "operationId": "time_travel_api_v1_demo_time_travel_post",
+        "parameters": [
+          {
+            "name": "setu_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Setu Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimeTravelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Time Travel Api V1 Demo Time Travel Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/demo/check-in": {
+      "post": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Check In",
+        "operationId": "check_in_api_v1_demo_check_in_post",
+        "parameters": [
+          {
+            "name": "setu_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Setu Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckInRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Check In Api V1 Demo Check In Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/demo/providers": {
+      "post": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Providers",
+        "operationId": "providers_api_v1_demo_providers_post",
+        "parameters": [
+          {
+            "name": "setu_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Setu Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Providers Api V1 Demo Providers Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/demo/scenario-step": {
+      "post": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Scenario Step",
+        "operationId": "scenario_step_api_v1_demo_scenario_step_post",
+        "parameters": [
+          {
+            "name": "setu_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Setu Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Scenario Step Api V1 Demo Scenario Step Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/sim/session": {
       "post": {
         "tags": [
@@ -2444,6 +2720,28 @@
         "type": "object",
         "title": "ApproveCallRequest"
       },
+      "CheckInRequest": {
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "title": "Patient Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "morning",
+              "evening"
+            ],
+            "title": "Kind",
+            "default": "morning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "patient_id"
+        ],
+        "title": "CheckInRequest"
+      },
       "DemoSeedRequest": {
         "properties": {
           "scenario": {
@@ -2645,6 +2943,43 @@
         ],
         "title": "PlanEditRequest"
       },
+      "ProviderRequest": {
+        "properties": {
+          "llm": {
+            "type": "string",
+            "enum": [
+              "mock",
+              "gemini"
+            ],
+            "title": "Llm"
+          }
+        },
+        "type": "object",
+        "required": [
+          "llm"
+        ],
+        "title": "ProviderRequest"
+      },
+      "ScenarioRequest": {
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "title": "Patient Id",
+            "default": "P001"
+          },
+          "step": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Step"
+          }
+        },
+        "type": "object",
+        "required": [
+          "step"
+        ],
+        "title": "ScenarioRequest"
+      },
       "SimMessageRequest": {
         "properties": {
           "patient_id": {
@@ -2743,6 +3078,26 @@
           "minutes"
         ],
         "title": "SnoozeRequest"
+      },
+      "TimeTravelRequest": {
+        "properties": {
+          "days": {
+            "type": "integer",
+            "maximum": 30.0,
+            "minimum": 0.0,
+            "title": "Days",
+            "default": 0
+          },
+          "hours": {
+            "type": "integer",
+            "maximum": 23.0,
+            "minimum": 0.0,
+            "title": "Hours",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "TimeTravelRequest"
       },
       "ValidationError": {
         "properties": {

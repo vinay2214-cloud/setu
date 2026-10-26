@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     whatsapp_verify_token: str = ""
     whatsapp_app_secret: str = ""
     demo_mode: bool = True
+    demo_auto_seed: bool = False
     clinic_name: str = "Demo Clinic"
     default_tz: str = "Asia/Kolkata"
     llm_timeout_s: float = 8.0

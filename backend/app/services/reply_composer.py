@@ -34,23 +34,32 @@ def validate_reply(
         ):
             if not any(med.lower() in lower for med in (allowed_meds or set())):
                 return False
+    script_text = text
+    for med in allowed_meds or set():
+        script_text = script_text.replace(med, "")
     if language == "te":
-        letters = [c for c in text if c.isalpha()]
+        letters = [c for c in script_text if c.isalpha()]
         if letters and sum("\u0c00" <= c <= "\u0c7f" for c in letters) / len(letters) < 0.6:
             return False
     if language == "hi":
-        letters = [c for c in text if c.isalpha()]
+        letters = [c for c in script_text if c.isalpha()]
         if letters and sum("\u0900" <= c <= "\u097f" for c in letters) / len(letters) < 0.6:
             return False
     return True
 
 
-def render_template(key: str, language: str, values: dict[str, str] | None = None) -> str:
+def render_template(
+    key: str,
+    language: str,
+    values: dict[str, str] | None = None,
+    *,
+    allowed_meds: set[str] | None = None,
+) -> str:
     if key not in TEMPLATES:
         key = "unclear_ask_again"
     template = TEMPLATES[key].get(language) or TEMPLATES[key]["en"]
     rendered = template.format_map(defaultdict(str, values or {}))
-    if not validate_reply(rendered, language, template_key=key):
+    if not validate_reply(rendered, language, template_key=key, allowed_meds=allowed_meds):
         # Approved clinical copy is fixed; validator failure falls back to a
         # fixed, localized review prompt, never generated text.
         key = "unclear_ask_again"

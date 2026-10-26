@@ -25,7 +25,7 @@ export default function PatientsPage() {
   useEffect(() => { void load(query); }, [load, query]);
   return (
     <div className="page-stack">
-      <div className="page-heading-row"><div><p className="eyebrow">CARE ROSTER</p><h1>Patients</h1><p className="page-intro">Synthetic patients ordered by current follow-up risk.</p></div><span className="count-chip"><Users size={16} />{patients.length} patients</span></div>
+      <div className="page-heading-row"><div><p className="eyebrow">CARE ROSTER</p><h1>Patients</h1><p className="page-intro">Synthetic patients ordered by current follow-up risk.</p></div><Link href="/patients/new" className="primary-button button-link">Enrol demo patient</Link><span className="count-chip"><Users size={16} />{patients.length} patients</span></div>
       <form className="patient-search-row" onSubmit={(event) => { event.preventDefault(); setQuery(search.trim()); }}>
         <label className="search-field"><Search size={17} /><span className="sr-only">Search patients</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name or patient ID" /></label>
         <button className="secondary-button" type="submit">Search</button>

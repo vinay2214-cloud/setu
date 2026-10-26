@@ -1,3 +1,4 @@
+import math
 from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -19,9 +20,14 @@ def _offset_seconds() -> int:
         return 0
 
 
+def real_now() -> datetime:
+    """Wall time for authentication, independent of demo time travel."""
+    return datetime.now(UTC)
+
+
 def now() -> datetime:
     """Return current UTC time shifted by the persisted demo-clock offset."""
-    return datetime.now(UTC) + timedelta(seconds=_offset_seconds())
+    return real_now() + timedelta(seconds=_offset_seconds())
 
 
 def set_time(value: datetime) -> datetime:
@@ -30,7 +36,7 @@ def set_time(value: datetime) -> datetime:
     from app.db import engine
 
     target = value.astimezone(UTC)
-    offset = int((target - datetime.now(UTC)).total_seconds())
+    offset = math.ceil((target - real_now()).total_seconds())
     with engine.begin() as connection:
         connection.execute(
             text("UPDATE demo_clock SET offset_seconds = :offset WHERE id = 1"), {"offset": offset}

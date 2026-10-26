@@ -11,6 +11,7 @@ from app.db import engine
 from app.services.events import broker
 from app.services.fact_builder import build_facts
 from app.services.intent_extractor import IntentExtractor
+from app.services.nutrition import meal_feedback
 from app.services.reply_composer import plan_replies, render_template
 from app.services.sentinel import evaluate_facts, persist_alerts
 
@@ -209,20 +210,30 @@ def handle_inbound_message(
         timestamp = now().astimezone(UTC).isoformat().replace("+00:00", "Z")
         event_date = now().astimezone(IST).date().isoformat()
         for event in med_events:
+            slot = "morning" if now().astimezone(IST).hour < 14 else "evening"
             target_meds = [
-                med for med in medications if med.get("criticality") == "critical"
-            ] or medications[:1]
+                med
+                for med in medications
+                if any(
+                    (int(t.split(":")[0]) < 14) == (slot == "morning") for t in med.get("times", [])
+                )
+            ]
+            named = [med for med in target_meds if med["name"].lower() in raw.lower()]
+            target_meds = named or target_meds
             for med in target_meds:
                 connection.execute(
                     text("""INSERT INTO medication_events(
                               patient_id,care_plan_id,med_id,event_date,slot,status,source_message_id,recorded_at)
-                              VALUES (:patient,:plan,:med,:day,:slot,:status,:source,:at)"""),
+                              VALUES (:patient,:plan,:med,:day,:slot,:status,:source,:at)
+                              ON CONFLICT(patient_id,med_id,event_date,slot) DO UPDATE SET
+                              status=excluded.status,source_message_id=excluded.source_message_id,
+                              recorded_at=excluded.recorded_at"""),
                     {
                         "patient": patient_id,
                         "plan": plan_row["id"] if plan_row else None,
                         "med": med["id"],
                         "day": event_date,
-                        "slot": event.get("slot") or "morning",
+                        "slot": "bedtime" if med.get("frequency_code") == "HS" else slot,
                         "status": event["status"],
                         "source": inbound_id,
                         "at": timestamp,
@@ -272,6 +283,16 @@ def handle_inbound_message(
                         "at": timestamp,
                     },
                 )
+        connection.execute(
+            text(
+                "UPDATE check_ins SET status='answered',answered_at=:at WHERE "
+                "patient_id=:p AND status='sent'"
+            ),
+            {"at": timestamp, "p": patient_id},
+        )
+        feedback = (
+            meal_feedback(raw, json.loads(patient["conditions"]), lang) if consented else None
+        )
         facts = build_facts(connection, patient_id, now(), inbound_id)
         evidence = [
             {
@@ -294,8 +315,10 @@ def handle_inbound_message(
             now=now(),
         )
         reply_keys = plan_replies(intent, fired, lang) if consented else []
+        if feedback and not any(rule.severity in {"CRITICAL", "HIGH", "MEDIUM"} for rule in fired):
+            reply_keys = (reply_keys + [feedback["template_key"]])[:3]
         for reply_index, key in enumerate(reply_keys):
-            values = {}
+            values = feedback["params"] if feedback and key == feedback["template_key"] else {}
             if key == "ack_vital" and intent.get("vitals"):
                 v = intent["vitals"][0]
                 values = {

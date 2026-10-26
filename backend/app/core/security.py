@@ -8,7 +8,7 @@ from fastapi import Cookie, HTTPException
 from sqlalchemy import text
 
 from app.config import get_settings
-from app.core.clock import now
+from app.core.clock import real_now
 from app.db import engine
 
 
@@ -27,7 +27,7 @@ def verify_password(password: str, stored: str) -> bool:
 
 def create_token(clinician_id: str, email: str, role: str) -> str:
     settings = get_settings()
-    issued = now()
+    issued = real_now()
     return jwt.encode(
         {
             "sub": clinician_id,

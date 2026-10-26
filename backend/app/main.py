@@ -29,7 +29,7 @@ RULE_PACK_PATH = ROOT / "seed" / "rules" / "diabetes_htn_v1.yaml"
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     settings = get_settings()
-    if settings.app_env != "development" and settings.demo_mode:
+    if settings.app_env not in {"development", "demo"} and settings.demo_mode:
         raise RuntimeError("DEMO_MODE must be disabled outside development.")
     default_secret = "local-demo-only-change-this-secret"
     if settings.app_env != "development" and settings.jwt_secret == default_secret:
@@ -38,7 +38,29 @@ async def lifespan(application: FastAPI):
     initialize_models()
     application.state.rule_pack = load_pack(RULE_PACK_PATH)
     ensure_demo_accounts()
-    yield
+    if settings.demo_auto_seed and settings.demo_mode:
+        from sqlalchemy import text
+
+        from app.db import engine
+        from app.seed_loader import seed_demo
+
+        with engine.connect() as connection:
+            populated = connection.execute(text("SELECT COUNT(*) FROM patients")).scalar()
+        if not populated:
+            seed_demo()
+    from apscheduler.schedulers.background import BackgroundScheduler
+
+    from app.services.orchestrator import tick
+
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(
+        tick, "interval", seconds=30, args=[application.state.rule_pack], max_instances=1
+    )
+    scheduler.start()
+    try:
+        yield
+    finally:
+        scheduler.shutdown(wait=False)
 
 
 def create_app() -> FastAPI:
@@ -100,6 +122,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     app.include_router(health_router)
+    app.include_router(health_router, prefix="/api/v1")
     app.include_router(auth_router, prefix="/api/v1")
     app.include_router(patients_router, prefix="/api/v1")
     app.include_router(alerts_router, prefix="/api/v1")

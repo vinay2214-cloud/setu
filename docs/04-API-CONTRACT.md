@@ -218,7 +218,7 @@ data: {}
 
 ## 12. Health
 
-`GET /health` → `{ "status":"ok", "db":"ok", "rules_loaded": 22, "llm":"mock", "time":"..." }`
+`GET /health` (also `/api/v1/health` for the same-origin proxy) → `{ "status":"ok", "db":"ok", "rules_loaded": 22, "llm":"mock", "time":"..." }`
 
 ## 13. Status codes summary
 

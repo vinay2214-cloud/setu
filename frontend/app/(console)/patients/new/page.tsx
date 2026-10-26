@@ -1,0 +1,11 @@
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { api } from "@/lib/api";
+import { PatientSchema } from "@/lib/schemas";
+import type { components } from "@/lib/api-types";
+export default function EnrolPatient() {
+  const router=useRouter();const [error,setError]=useState("");const [busy,setBusy]=useState(false);
+  async function submit(event:React.FormEvent<HTMLFormElement>){event.preventDefault();const values=new FormData(event.currentTarget);setBusy(true);setError("");const payload:components["schemas"]["PatientCreate"]={name:String(values.get("name")),age:Number(values.get("age")),sex:values.get("sex") as "M"|"F"|"O",language:values.get("language") as "te"|"hi"|"en",conditions:["diabetes","hypertension"],discharge_date:String(values.get("date")),consent:{granted:true,type:"care_messaging",channel:"simulator",text_version:"v1"}};try{const patient=await api("/patients",PatientSchema,{method:"POST",body:JSON.stringify(payload)});router.push(`/patients/${patient.id}/intake`);}catch(e){setError(e instanceof Error?e.message:"Could not enrol patient");}finally{setBusy(false);}}
+  return <div className="page-stack"><div><p className="eyebrow">SYNTHETIC DATA ONLY</p><h1>Enrol a demo patient</h1></div><form className="detail-card form-stack enrol-form" onSubmit={submit}><label>Synthetic patient name<input name="name" required placeholder="Demo Patient" /></label><label>Age<input name="age" type="number" min={18} max={120} defaultValue={58} required /></label><label>Sex<select name="sex"><option>M</option><option>F</option><option>O</option></select></label><label>Language<select name="language"><option value="te">తెలుగు</option><option value="hi">हिन्दी</option><option value="en">English</option></select></label><label>Discharge date<input type="date" name="date" required /></label><p>Prototype conditions: type 2 diabetes and hypertension.</p><label className="checkbox-label"><input type="checkbox" required />Record synthetic consent for simulator care messaging.</label>{error?<p role="alert" className="inline-error">{error}</p>:null}<button className="primary-button" disabled={busy}>Create patient and review plan</button></form></div>;
+}
