@@ -32,7 +32,7 @@ export const AlertSchema = z.object({
   title: z.string(),
   summary: z.string(),
   rule: z.object({ id: z.string(), version: z.string(), title: z.string(), clinician_review: z.string() }),
-  facts_used: z.record(z.unknown()),
+  facts_used: z.record(z.string(), z.unknown()),
   contributing_rules: z.array(z.object({ id: z.string(), version: z.string(), title: z.string(), severity: SeveritySchema })),
   related_alert_id: z.string().nullable(),
   evidence: z.array(z.object({ message_id: z.string(), at: z.string(), text: z.string().nullable(), text_en: z.string().nullable(), language: z.string() })),
@@ -53,7 +53,7 @@ export const PageSchema = <T extends z.ZodTypeAny>(item: T) => z.object({
 
 export const MetricsSchema = z.object({
   open: z.number(),
-  by_severity: z.record(z.number()),
+  by_severity: z.record(z.string(), z.number()),
   median_minutes_to_ack_7d: z.number().nullable(),
   overdue: z.number(),
 });

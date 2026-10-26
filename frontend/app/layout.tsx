@@ -1,4 +1,9 @@
 import type { Metadata } from "next";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/fraunces/500.css";
+import "@fontsource/noto-sans-telugu/400.css";
+import "@fontsource/noto-sans-devanagari/400.css";
 import "./globals.css";
 import { QueryProvider } from "@/components/setu/query-provider";
 

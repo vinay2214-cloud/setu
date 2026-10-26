@@ -26,3 +26,20 @@ class EventBroker:
 
 
 broker = EventBroker()
+
+
+def publish_alert(event: str, alert: dict) -> None:
+    """Publish the same public Alert shape as the authenticated REST endpoints."""
+    from sqlalchemy import text
+
+    from app.api.alerts import _alert
+    from app.db import engine
+
+    with engine.connect() as connection:
+        row = (
+            connection.execute(text("SELECT * FROM alerts WHERE id=:id"), {"id": alert["id"]})
+            .mappings()
+            .one()
+        )
+        payload = _alert(connection, row)
+    broker.publish(event, {"alert": payload})

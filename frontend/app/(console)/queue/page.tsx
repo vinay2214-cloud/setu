@@ -15,7 +15,7 @@ const severityRank: Record<Severity, number> = { CRITICAL: 4, HIGH: 3, MEDIUM: 2
 const EmptyMetricsSchema = MetricsSchema;
 
 function dueLabel(iso: string, clock: string | null): string {
-  const minutes = Math.round((new Date(iso).getTime() - (clock ? Date.parse(clock) : Date.now())) / 60_000);
+  const minutes = Math.round((new Date(iso).getTime() - Date.parse(clock ?? "1970-01-01T00:00:00Z")) / 60_000);
   if (minutes < 0) return `Overdue ${Math.abs(minutes)}m`;
   if (minutes < 60) return `Due in ${minutes}m`;
   return `Due in ${Math.floor(minutes / 60)}h ${minutes % 60}m`;
@@ -23,7 +23,7 @@ function dueLabel(iso: string, clock: string | null): string {
 
 export default function QueuePage() {
   const queryClient = useQueryClient();
-  const [clock, setClock] = useState<string | null>(null);
+  const [clock, setClock] = useState<string | null>(() => new Date().toISOString());
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [metrics, setMetrics] = useState<z.infer<typeof MetricsSchema> | null>(null);
   const [selected, setSelected] = useState<Alert | null>(null);
@@ -38,17 +38,17 @@ export default function QueuePage() {
     setAlerts((current) => {
       const exists = current.some((alert) => alert.id === updated.id);
       if (!["open", "acknowledged"].includes(updated.status)) return current.filter((alert) => alert.id !== updated.id);
-      return [...(exists ? current.filter((alert) => alert.id !== updated.id) : current), updated]
+      return [...(exists ? current.filter((alert) => alert.id !== updated.id && alert.id !== updated.related_alert_id) : current.filter(alert => alert.id !== updated.related_alert_id)), updated]
         .sort((a, b) => severityRank[b.severity] - severityRank[a.severity] || a.due_by.localeCompare(b.due_by));
     });
     setSelected((current) => current?.id === updated.id ? updated : current);
+    void Promise.all([api("/alerts", PageSchema(AlertSchema)), api("/alerts/metrics", MetricsSchema)])
+      .then(([page, kpis]) => { setAlerts(page.items); setMetrics(kpis); }).catch(() => undefined);
     setToast(`Alert update · ${updated.severity} · ${updated.rule.id}`);
   }, []);
   const connected = useAlertStream(onAlert);
 
   const refresh = useCallback(async () => {
-    setLoading(true);
-    setError("");
     try {
       const [page, kpis] = await Promise.all([
         queryClient.fetchQuery({ queryKey: ["alerts"], queryFn: () => api("/alerts", PageSchema(AlertSchema)), staleTime: 0 }),
@@ -62,7 +62,7 @@ export default function QueuePage() {
       setError(cause instanceof Error ? cause.message : "Could not load the priority queue.");
     } finally { setLoading(false); }
   }, [queryClient]);
-  useEffect(() => { void refresh(); const timer = setInterval(() => void refresh(), 15000); return () => clearInterval(timer); }, [refresh]);
+  useEffect(() => { void Promise.resolve().then(refresh); const timer = setInterval(() => void refresh(), 15000); return () => clearInterval(timer); }, [refresh]);
 
   const visible = useMemo(() => alerts.filter((alert) =>
     (severity === "ALL" || alert.severity === severity) &&
@@ -86,7 +86,7 @@ export default function QueuePage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [activeIndex, onAlert, visible, selected]);
 
-  const overdue = metrics?.overdue ?? alerts.filter((alert) => Date.parse(alert.due_by) < (clock ? Date.parse(clock) : Date.now())).length;
+  const overdue = metrics?.overdue ?? alerts.filter((alert) => Date.parse(alert.due_by) < Date.parse(clock ?? "1970-01-01T00:00:00Z")).length;
   return (
     <div className="page-stack">
       <div className="page-heading-row"><div><p className="eyebrow">CLINICIAN WORKLIST</p><h1>Today’s priority queue</h1><p className="page-intro">Review follow-ups in order of severity and urgency.</p></div>
@@ -110,7 +110,7 @@ export default function QueuePage() {
             <div className="alert-card-main"><div className="alert-card-top"><SeverityBadge severity={alert.severity} /><span className="rule-chip">{alert.rule.id} · v{alert.rule.version}</span></div>
               <h2>{alert.title}</h2><p className="alert-patient-line">{alert.patient.name} · {alert.patient.age}{alert.patient.sex} · Day {alert.patient.day_since_discharge} · {alert.patient.language.toUpperCase()}</p>
               <p className="alert-summary">{alert.summary}</p>
-            </div><div className="alert-card-meta"><span className={Date.parse(alert.due_by) < (clock ? Date.parse(clock) : Date.now()) ? "overdue-label" : "due-label"}><Clock3 size={15} />{dueLabel(alert.due_by, clock)}</span><span className="status-label">{alert.status}</span><span className="open-hint">Open details <ArrowDown size={14} /></span></div>
+            </div><div className="alert-card-meta"><span className={Date.parse(alert.due_by) < Date.parse(clock ?? "1970-01-01T00:00:00Z") ? "overdue-label" : "due-label"}><Clock3 size={15} />{dueLabel(alert.due_by, clock)}</span><span className="status-label">{alert.status}</span><span className="open-hint">Open details <ArrowDown size={14} /></span></div>
           </button>)}
         </section>
       ) : !error ? <div className="empty-state"><CheckCircle2 size={32} /><h2>No open alerts. Everyone is on track.</h2><p>New care team follow-ups will appear here.</p></div> : null}

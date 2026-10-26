@@ -1,7 +1,7 @@
 import type { components } from "./api-types";
 import { z } from "zod";
 
-const baseUrl = (process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000/api/v1").replace(/\/$/, "");
+const baseUrl = (process.env.NEXT_PUBLIC_API_BASE ?? "/api/v1").replace(/\/$/, "");
 
 export class ApiError extends Error {
   constructor(message: string, readonly status: number) {

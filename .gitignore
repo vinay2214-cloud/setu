@@ -13,3 +13,7 @@ out/
 dist/
 coverage/
 .DS_Store
+
+artifacts/
+playwright-report/
+test-results/

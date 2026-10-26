@@ -14,7 +14,7 @@ export default function PatientsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const load = useCallback(async (filter: string) => {
-    setLoading(true);
+
     try {
       const page = await api(`/patients?limit=100${filter ? `&q=${encodeURIComponent(filter)}` : ""}`, PageSchema(PatientSchema));
       setPatients(page.items);
@@ -22,7 +22,7 @@ export default function PatientsPage() {
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not load patients."); }
     finally { setLoading(false); }
   }, []);
-  useEffect(() => { void load(query); }, [load, query]);
+  useEffect(() => { void Promise.resolve().then(() => load(query)); }, [load, query]);
   return (
     <div className="page-stack">
       <div className="page-heading-row"><div><p className="eyebrow">CARE ROSTER</p><h1>Patients</h1><p className="page-intro">Synthetic patients ordered by current follow-up risk.</p></div><Link href="/patients/new" className="primary-button button-link">Enrol demo patient</Link><span className="count-chip"><Users size={16} />{patients.length} patients</span></div>

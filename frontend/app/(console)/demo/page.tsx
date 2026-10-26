@@ -9,11 +9,11 @@ export default function DemoPage() {
   const [busy,setBusy]=useState(false);
   const [message,setMessage]=useState("");
   const [step,setStep]=useState(1);
-  const refresh=useCallback(async()=>setState(await api("/demo/state",StateSchema)),[]);
-  useEffect(()=>{void refresh().catch(()=>setMessage("Demo mode is disabled or the API is unavailable."));},[refresh]);
+  const refresh=useCallback(async()=>{const value=await api("/demo/state",StateSchema);setState(value);},[]);
+  useEffect(()=>{void Promise.resolve().then(refresh).catch(()=>setMessage("Demo mode is disabled or the API is unavailable."));},[refresh]);
   async function action(path:string,body?:Record<string,unknown>) {
     setBusy(true);setMessage("");
-    try { await api(`/demo/${path}`,path==="reset"?z.undefined():z.record(z.unknown()),{method:"POST",body:body?JSON.stringify(body):undefined}); await refresh(); setMessage(`${path} completed.`); }
+    try { await api(`/demo/${path}`,path==="reset"?z.undefined():z.record(z.string(), z.unknown()),{method:"POST",body:body?JSON.stringify(body):undefined}); await refresh(); setMessage(`${path} completed.`); }
     catch(e) {setMessage(e instanceof Error?e.message:"Action failed");}
     finally {setBusy(false);}
   }

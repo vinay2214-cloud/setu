@@ -30,7 +30,7 @@ RULE_PACK_PATH = ROOT / "seed" / "rules" / "diabetes_htn_v1.yaml"
 async def lifespan(application: FastAPI):
     settings = get_settings()
     if settings.app_env not in {"development", "demo"} and settings.demo_mode:
-        raise RuntimeError("DEMO_MODE must be disabled outside development.")
+        raise RuntimeError("DEMO_MODE requires development or explicit demo environment.")
     default_secret = "local-demo-only-change-this-secret"
     if settings.app_env != "development" and settings.jwt_secret == default_secret:
         raise RuntimeError("JWT_SECRET must be configured outside development.")

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Activity, ClipboardCheck, MessageSquareText, ShieldAlert, UserRound } from "lucide-react";
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine } from "recharts";
 import { z } from "zod";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
@@ -14,13 +14,13 @@ import { SeverityBadge } from "@/components/setu/severity-badge";
 const MessageSchema = z.object({
   id: z.string(), patient_id: z.string(), direction: z.string(), channel: z.string(), language: z.string(),
   text: z.string().nullable(), text_en: z.string().nullable(), template_key: z.string().nullable(),
-  intent: z.record(z.unknown()).nullable(), quick_replies: z.array(z.unknown()), created_at: z.string(),
+  intent: z.record(z.string(), z.unknown()).nullable(), quick_replies: z.array(z.unknown()), created_at: z.string(),
 });
 const ObservationSchema = z.object({
   id: z.number().optional(), type: z.string(), value_num: z.number().nullable().optional(),
   value_num2: z.number().nullable().optional(), unit: z.string().nullable().optional(), context: z.string().nullable().optional(), recorded_at: z.string(),
 });
-const TimelineSchema = z.object({ type: z.string(), at: z.string(), data: z.record(z.unknown()) });
+const TimelineSchema = z.object({ type: z.string(), at: z.string(), data: z.record(z.string(), z.unknown()) });
 const AdherenceSchema = z.object({ event_date: z.string(), med_id: z.string(), slot: z.string(), status: z.string() });
 const TimelinePageSchema = PageSchema(TimelineSchema);
 const ObservationPageSchema = PageSchema(ObservationSchema);
@@ -31,6 +31,8 @@ type Tab = (typeof tabs)[number];
 export default function PatientDetailPage() {
   const params = useParams<{ id: string }>();
   const patientId = params.id;
+  const [vitalType, setVitalType] = useState<"glucose" | "bp">("glucose");
+  const [thresholds, setThresholds] = useState<Array<{id:string; value:number}>>([]);
   const [plans, setPlans] = useState<CarePlan[]>([]);
   const [showEnglish, setShowEnglish] = useState(true);
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -43,29 +45,31 @@ export default function PatientDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const load = useCallback(async () => {
-    setLoading(true); setError("");
+
     try {
-      const [p, alertPage, messagePage, vitalPage, timelinePage, adherencePage, planPage] = await Promise.all([
+      const [p, alertPage, messagePage, vitalPage, timelinePage, adherencePage, planPage, pack] = await Promise.all([
         api(`/patients/${patientId}`, PatientSchema),
         api(`/alerts?patient_id=${encodeURIComponent(patientId)}&status=open,acknowledged,resolved`, PageSchema(AlertSchema)),
         api(`/patients/${patientId}/messages?limit=100`, PageSchema(MessageSchema)),
-        api(`/patients/${patientId}/vitals?type=glucose&days=90&limit=100`, ObservationPageSchema),
+        api(`/patients/${patientId}/vitals?type=${vitalType}&days=90&limit=100`, ObservationPageSchema),
         api(`/patients/${patientId}/timeline?limit=100`, TimelinePageSchema),
         api(`/patients/${patientId}/adherence?days=14&limit=100`, AdherencePageSchema),
         api(`/patients/${patientId}/care-plans`, z.object({ items: z.array(PlanSchema) })),
+        api("/rules/packs/diabetes_htn", z.object({ rules: z.array(z.object({id:z.string(), when:z.record(z.string(),z.unknown())})) })),
       ]);
+      setThresholds(pack.rules.flatMap(rule => valuesForFact(rule.when, vitalType === "glucose" ? "glucose_latest" : "bp_sys_latest").map(value => ({id:rule.id,value}))));
       setPatient(p); setAlerts(alertPage.items); setMessages(messagePage.items); setObservations(vitalPage.items);
       setPlans(planPage.items); setTimeline(timelinePage.items); setAdherence(adherencePage.items);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not load patient record."); }
     finally { setLoading(false); }
-  }, [patientId]);
-  useEffect(() => { void load(); }, [load]);
+  }, [patientId, vitalType]);
+  useEffect(() => { void Promise.resolve().then(load); }, [load]);
 
   if (loading) return <div className="page-stack"><div className="skeleton-row" /><div className="skeleton-row" /><div className="skeleton-row" /></div>;
   if (error || !patient) return <div className="error-state" role="alert"><p>{error || "Patient not found."}</p><button className="secondary-button" onClick={() => void load()} type="button">Retry</button></div>;
   const chartData = observations.filter((item) => item.value_num != null).map((item) => ({
     date: new Date(item.recorded_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" }),
-    value: item.value_num as number,
+    value: item.value_num as number, value2: item.value_num2,
   }));
   const adherenceRate = patient.risk.adherence_7d == null ? null : Math.round(patient.risk.adherence_7d * 100);
 
@@ -84,9 +88,9 @@ export default function PatientDetailPage() {
     </nav>
     {tab === "Overview" ? <section className="patient-panel">
       <div className="detail-grid"><div className="detail-card"><div className="section-heading"><ClipboardCheck size={18} /><h2>Medication adherence</h2></div><p className="muted">Recent recorded events · last 14 days</p>
-        {adherence.length ? <div className="adherence-table"><div className="adherence-head"><span>Date</span><span>Medicine</span><span>Slot</span><span>Status</span></div>{adherence.map((event, index) => <div className="adherence-row" key={`${event.event_date}-${event.med_id}-${event.slot}-${index}`}><span>{event.event_date}</span><span>{event.med_id}</span><span>{event.slot}</span><span className={`event-status status-${event.status}`}>{event.status}</span></div>)}</div> : <p className="empty-inline">No medication events recorded in this window.</p>}
-      </div><div className="detail-card"><div className="section-heading"><Activity size={18} /><h2>Home glucose readings</h2></div><p className="muted">Recorded observations · mg/dL</p>
-        {chartData.length ? <><div className="chart-frame"><ResponsiveContainer width="100%" height="100%"><LineChart data={chartData}><XAxis dataKey="date" /><YAxis width={38} /><Tooltip /><Line type="monotone" dataKey="value" stroke="var(--brand-700)" strokeWidth={2} dot={{ r: 3 }} /></LineChart></ResponsiveContainer></div><table className="visually-hidden"><caption>Glucose reading data</caption><thead><tr><th>Date</th><th>Value</th></tr></thead><tbody>{chartData.map((item, index) => <tr key={`${item.date}-${index}`}><td>{item.date}</td><td>{item.value} mg/dL</td></tr>)}</tbody></table></> : <p className="empty-inline">No glucose readings recorded in this window.</p>}
+        {adherence.length ? <div className="adherence-table"><div className="adherence-head"><span>Date</span><span>Medicine</span><span>Slot</span><span>Status</span></div>{adherence.map((event, index) => <div className="adherence-row" key={`${event.event_date}-${event.med_id}-${event.slot}-${index}`}><span>{event.event_date}</span><span>{event.med_id}</span><span>{event.slot}</span><span className={`event-status status-${event.status}`}>{event.status === "taken" ? "✓ " : event.status === "missed" ? "✕ " : "· "}{event.status}</span></div>)}</div> : <p className="empty-inline">No medication events recorded in this window.</p>}
+      </div><div className="detail-card"><div className="section-heading"><Activity size={18} /><h2>Home readings</h2><select aria-label="Vital chart" value={vitalType} onChange={e => setVitalType(e.target.value as "glucose" | "bp")}><option value="glucose">Glucose</option><option value="bp">Blood pressure</option></select></div><p className="muted">Recorded observations · {vitalType === "glucose" ? "mg/dL" : "mmHg"} · dashed lines from draft rule pack</p>
+        {chartData.length ? <><div className="chart-frame"><ResponsiveContainer width="100%" height="100%"><LineChart data={chartData}><XAxis dataKey="date" /><YAxis width={38} /><Tooltip />{thresholds.map((threshold,index) => <ReferenceLine key={`${threshold.id}-${index}`} y={threshold.value} stroke="#a95935" strokeDasharray="3 4" ifOverflow="extendDomain" label={{value:threshold.id,fontSize:8}} />)}{vitalType === "bp" ? <Line type="monotone" dataKey="value2" stroke="#ad6e18" name="Diastolic" /> : null}<Line type="monotone" dataKey="value" stroke="var(--brand-700)" strokeWidth={2} dot={{ r: 3 }} /></LineChart></ResponsiveContainer></div><table className="visually-hidden"><caption>Glucose reading data</caption><thead><tr><th>Date</th><th>Value</th><th>Diastolic</th></tr></thead><tbody>{chartData.map((item, index) => <tr key={`${item.date}-${index}`}><td>{item.date}</td><td>{item.value} {vitalType === "glucose" ? "mg/dL" : "mmHg"}</td><td>{item.value2 ?? "—"}</td></tr>)}</tbody></table></> : <p className="empty-inline">No readings recorded in this window.</p>}
       </div></div>
       <div className="detail-card"><div className="section-heading"><Activity size={18} /><h2>Recent care timeline</h2></div>{timeline.length ? <ol className="timeline-list">{timeline.slice(0, 8).map((item, index) => <li key={`${item.type}-${item.at}-${index}`}><time>{new Date(item.at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST</time><strong>{item.type.replaceAll("_", " ")}</strong><span>{timelineSummary(item)}</span></li>)}</ol> : <p className="empty-inline">No recent timeline events.</p>}</div>
     </section> : null}
@@ -107,4 +111,9 @@ function timelineSummary(item: z.infer<typeof TimelineSchema>): string {
   if (item.type === "observation") return `${String(data.type ?? "Reading")}: ${String(data.value_num ?? "")}${data.value_num2 ? `/${String(data.value_num2)}` : ""} ${String(data.unit ?? "")}`;
   if (item.type === "medication") return `${String(data.med_id ?? "Medicine")} · ${String(data.status ?? "")}`;
   return String(data.kind ?? item.type.replaceAll("_", " "));
+}
+
+function valuesForFact(node: Record<string,unknown>, fact:string): number[] {
+  if (node.fact === fact && typeof node.value === "number") return [node.value];
+  return Object.values(node).flatMap(value => Array.isArray(value) ? value.flatMap(child => typeof child === "object" && child !== null ? valuesForFact(child as Record<string,unknown>,fact) : []) : typeof value === "object" && value !== null ? valuesForFact(value as Record<string,unknown>,fact) : []);
 }

@@ -7,7 +7,7 @@ from sqlalchemy import text
 from app.core.audit import record
 from app.core.clock import IST, now
 from app.db import engine
-from app.services.events import broker
+from app.services.events import broker, publish_alert
 from app.services.fact_builder import build_facts
 from app.services.nutrition import daily_tip
 from app.services.pipeline import _message_payload
@@ -261,5 +261,5 @@ def tick(rule_pack) -> dict:
                 entity_id=alert_id,
             )
     for alert in alerts_to_publish:
-        broker.publish("alert.updated", {"alert": alert})
+        publish_alert("alert.updated", alert)
     return {"check_ins_sent": sent, "check_ins_missed": len(missed)}

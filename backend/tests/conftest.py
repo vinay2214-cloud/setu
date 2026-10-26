@@ -1,7 +1,16 @@
+import os
+import tempfile
+
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app
+_test_directory = tempfile.TemporaryDirectory(prefix="setu-tests-")
+os.environ["DATABASE_URL"] = f"sqlite:///{_test_directory.name}/test.db"
+os.environ["DEMO_AUTO_SEED"] = "false"
+os.environ["APP_ENV"] = "development"
+os.environ["DEMO_MODE"] = "true"
+
+from app.main import app  # noqa: E402
 
 
 @pytest.fixture

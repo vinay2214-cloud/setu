@@ -63,7 +63,7 @@ def _patient_payload(connection, patient) -> dict:
     known = [row["status"] for row in adherence_rows if row["status"] in {"taken", "missed"}]
     adherence = sum(status == "taken" for status in known) / len(known) if known else None
     discharge = date.fromisoformat(patient["discharge_date"])
-    day = max((now().astimezone(IST).date() - discharge).days + 1, 1)
+    day = max((now().astimezone(IST).date() - discharge).days, 1)
     return {
         "id": patient["id"],
         "name": patient["name"],

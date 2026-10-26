@@ -22,7 +22,7 @@ export default function IntakePage() {
   async function save() {
     if (!plan) return;
     const parsed: unknown = JSON.parse(edited);
-    const result = await api(`/care-plans/${plan.id}`, PlanSchema, { method: "PATCH", body: JSON.stringify({ plan: z.record(z.unknown()).parse(parsed), expected_version: plan.version }) });
+    const result = await api(`/care-plans/${plan.id}`, PlanSchema, { method: "PATCH", body: JSON.stringify({ plan: z.record(z.string(), z.unknown()).parse(parsed), expected_version: plan.version }) });
     setPlan(result); setEdited(JSON.stringify(result.plan, null, 2)); setMedsReviewed(false); setFlagsReviewed(false);
   }
   async function transition(action: string) { if (plan) setPlan(await api(`/care-plans/${plan.id}/${action}`, PlanSchema, { method: "POST", body: JSON.stringify({ note: "Reviewed source and structured plan" }) })); }

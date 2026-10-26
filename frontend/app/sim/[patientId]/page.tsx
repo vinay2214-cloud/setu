@@ -9,7 +9,7 @@ import { MessageSchema, type Message } from "@/lib/messages";
 import { ui, type Language } from "@/lib/i18n";
 import type { components } from "@/lib/api-types";
 const SessionSchema = z.object({ token: z.string(), patient: z.object({ name: z.string(), language: z.enum(["en", "te", "hi"]) }), messages: z.array(MessageSchema) });
-const ResultSchema = z.object({ message: MessageSchema, replies: z.array(MessageSchema), alerts: z.array(z.object({ id: z.string(), severity: z.string(), rule_id: z.string(), status: z.string() })), extracted: z.record(z.unknown()) });
+const ResultSchema = z.object({ message: MessageSchema, replies: z.array(MessageSchema), alerts: z.array(z.object({ id: z.string(), severity: z.string(), rule_id: z.string(), status: z.string() })), extracted: z.record(z.string(), z.unknown()) });
 const PollSchema = z.object({ items: z.array(MessageSchema), next_after: z.string().nullable() });
 export default function PatientSimulator() {
   const { patientId } = useParams<{ patientId: string }>();
@@ -60,7 +60,7 @@ export default function PatientSimulator() {
     finally { setBusy(false); }
   }
   return <main className="sim-page"><div className="ribbon">SYNTHETIC DATA · PROTOTYPE · NOT FOR CLINICAL USE</div><div className="sim-workspace">
-    <section className="phone-frame" aria-label="Patient simulator"><header className="phone-header"><Link href="/sim" aria-label="Choose patient">←</Link><span className="setu-avatar">S</span><div><strong>Setu (demo)</strong><small lang={lang}>{text.title}</small></div><ShieldCheck size={20} /></header>
+    <section className="phone-frame" aria-label="Patient simulator"><header className="phone-header"><Link href="/sim" aria-label="Choose patient">←</Link><span className="setu-avatar">S</span><div><strong>Setu (demo)</strong><small lang={lang}>{text.title}</small></div><ShieldCheck size={20} /></header><div className="mobile-sim-tools"><select aria-label="Chat language" value={lang} onChange={e => setLang(e.target.value as Language)}><option value="te">తెలుగు</option><option value="hi">हिन्दी</option><option value="en">English</option></select><label><input type="checkbox" checked={english} onChange={e => setEnglish(e.target.checked)} />{text.english}</label></div>
       <div className="sim-conversation" aria-live="polite" aria-busy={busy}>{messages.map(message => <article key={message.id} className={`sim-bubble ${message.direction === "in" ? "patient-bubble" : "bot-bubble"}`}><p lang={message.language ?? lang}>{message.text}</p>{english && message.text_en && message.text_en !== message.text ? <p className="translation">{message.text_en}</p> : null}<time>{new Date(message.created_at).toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit" })}</time></article>)}{busy ? <p className="typing-label" lang={lang}>{text.typing}</p> : null}<div ref={bottom} /></div>
       {error ? <p className="inline-error sim-error" role="alert">{error}</p> : null}
       <div className="quick-replies"><button disabled={busy || !session} onClick={() => void send("yes_taken")} lang={lang}>{text.taken}</button><button disabled={busy || !session} onClick={() => void send("not_taken")} lang={lang}>{text.missed}</button><button disabled={busy || !session} onClick={() => void send("no_symptoms")} lang={lang}>{text.okay}</button></div>

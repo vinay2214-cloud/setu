@@ -54,8 +54,7 @@ def _alert(connection, row) -> dict:
         "patient": {
             **dict(patient),
             "day_since_discharge": max(
-                (now().astimezone(IST).date() - date.fromisoformat(patient["discharge_date"])).days
-                + 1,
+                (now().astimezone(IST).date() - date.fromisoformat(patient["discharge_date"])).days,
                 1,
             ),
         },
@@ -146,6 +145,7 @@ async def stream_alerts():
     subscription = broker.subscribe()
 
     async def events():
+        yield "event: ping\ndata: {}\n\n"
         try:
             while True:
                 try:
@@ -157,7 +157,9 @@ async def stream_alerts():
             broker.unsubscribe(subscription)
 
     return StreamingResponse(
-        events(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"}
+        events(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"},
     )
 
 

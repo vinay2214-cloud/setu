@@ -8,7 +8,7 @@ from sqlalchemy import text
 from app.core.audit import record
 from app.core.clock import IST, now
 from app.db import engine
-from app.services.events import broker
+from app.services.events import broker, publish_alert
 from app.services.fact_builder import build_facts
 from app.services.intent_extractor import IntentExtractor
 from app.services.nutrition import meal_feedback
@@ -357,9 +357,9 @@ def handle_inbound_message(
                 {"response": json.dumps(result, ensure_ascii=False), "id": inbound_id},
             )
     for alert in alerts:
-        broker.publish(
+        publish_alert(
             "alert.created" if alert["created_at"] == alert["updated_at"] else "alert.updated",
-            {"alert": alert},
+            alert,
         )
     broker.publish("message.created", {"message": _message_payload(inbound_row)})
     for row in result.get("replies", []) if result else []:

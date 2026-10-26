@@ -7,6 +7,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
 from app.core.audit import record
+from app.core.clock import IST
 from app.rules.engine import SEVERITY_ORDER, evaluate
 from app.rules.loader import RulePack
 
@@ -191,7 +192,11 @@ def persist_alerts(
                     }
                 )
         local_day = max(
-            (now.date() - datetime.fromisoformat(patient["discharge_date"]).date()).days + 1, 1
+            (
+                now.astimezone(IST).date()
+                - datetime.fromisoformat(patient["discharge_date"]).date()
+            ).days,
+            1,
         )
         summary = (
             f"{patient['age']}{patient['sex']}, day {local_day} post-discharge. {primary.title}."

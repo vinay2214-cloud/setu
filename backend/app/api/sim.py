@@ -179,6 +179,7 @@ async def stream_messages(
     subscription = broker.subscribe()
 
     async def events():
+        yield "event: ping\ndata: {}\n\n"
         try:
             while True:
                 try:
@@ -192,5 +193,7 @@ async def stream_messages(
             broker.unsubscribe(subscription)
 
     return StreamingResponse(
-        events(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"}
+        events(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"},
     )
