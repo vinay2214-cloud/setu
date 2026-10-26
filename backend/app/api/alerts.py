@@ -1,8 +1,10 @@
+import asyncio
 import base64
 import json
 from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlalchemy import text
 
 from app.core.audit import record
@@ -10,6 +12,7 @@ from app.core.clock import IST, now
 from app.core.security import current_clinician
 from app.db import engine
 from app.schemas.api import ApproveCallRequest, NoteRequest, SnoozeRequest
+from app.services.events import broker
 
 router = APIRouter(prefix="/alerts", tags=["alerts"], dependencies=[Depends(current_clinician)])
 
@@ -138,6 +141,26 @@ def metrics() -> dict:
     }
 
 
+@router.get("/stream")
+async def stream_alerts():
+    subscription = broker.subscribe()
+
+    async def events():
+        try:
+            while True:
+                try:
+                    event, payload = await asyncio.wait_for(subscription[1].get(), timeout=15)
+                    yield f"event: {event}\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"
+                except TimeoutError:
+                    yield "event: ping\ndata: {}\n\n"
+        finally:
+            broker.unsubscribe(subscription)
+
+    return StreamingResponse(
+        events(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"}
+    )
+
+
 @router.get("/{alert_id}")
 def get_alert(alert_id: str) -> dict:
     with engine.connect() as connection:
@@ -224,7 +247,9 @@ def _transition(
             .mappings()
             .one()
         )
-        return _alert(connection, updated)
+        payload = _alert(connection, updated)
+    broker.publish("alert.updated", {"alert": payload})
+    return payload
 
 
 @router.post("/{alert_id}/acknowledge")

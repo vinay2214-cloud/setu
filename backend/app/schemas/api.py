@@ -40,3 +40,22 @@ class DemoSeedRequest(BaseModel):
 
 class EvaluateRequest(BaseModel):
     facts: dict
+
+
+class SimSessionRequest(BaseModel):
+    patient_id: str
+
+
+class SimMessageRequest(BaseModel):
+    patient_id: str
+    client_msg_id: str = Field(min_length=1, max_length=100)
+    text: str | None = Field(default=None, max_length=1000)
+    language: Literal["te", "hi", "en"] | None = None
+    quick_reply: Literal["yes_taken", "not_taken", "no_symptoms", "have_symptom", "skip"] | None = (
+        None
+    )
+
+
+class TimeTravelRequest(BaseModel):
+    days: int = Field(default=0, ge=0, le=30)
+    hours: int = Field(default=0, ge=0, le=23)

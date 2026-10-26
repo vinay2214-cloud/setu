@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS messages (
   audio_url     TEXT,
   template_key  TEXT,
   intent_json   TEXT,
+  response_json TEXT,
   client_msg_id TEXT,
   created_at    TEXT NOT NULL
 );

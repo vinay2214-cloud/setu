@@ -14,6 +14,7 @@ from app.api.demo import router as demo_router
 from app.api.health import router as health_router
 from app.api.patients import router as patients_router
 from app.api.rules import router as rules_router
+from app.api.sim import router as sim_router
 from app.config import get_settings
 from app.db import initialize_database
 from app.models import initialize_models
@@ -103,6 +104,7 @@ def create_app() -> FastAPI:
     app.include_router(alerts_router, prefix="/api/v1")
     app.include_router(rules_router, prefix="/api/v1")
     app.include_router(demo_router, prefix="/api/v1")
+    app.include_router(sim_router, prefix="/api/v1")
     return app
 
 

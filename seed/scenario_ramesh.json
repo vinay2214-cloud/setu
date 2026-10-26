@@ -2,7 +2,7 @@
   "_meta": {
     "patient_id": "P001",
     "note": "History days 1-7 are pre-seeded by POST /demo/seed. 'live_steps' are scripted patient messages applied one by one by POST /demo/scenario-step (or typed live by the presenter). Day numbering is days since discharge (2026-10-18).",
-    "clock_at_start": "2026-10-26T03:00:00Z"
+    "clock_at_start": "2026-10-26T02:30:00Z"
   },
   "history": [
     { "day": 1, "meds": "all_taken", "glucose": 142, "bp": [136, 86], "meal": "idli, sambar", "note": "Good start" },

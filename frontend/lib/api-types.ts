@@ -108,6 +108,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/patients/{patient_id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Patient Messages */
+        get: operations["patient_messages_api_v1_patients__patient_id__messages_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/{patient_id}/timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Patient Timeline */
+        get: operations["patient_timeline_api_v1_patients__patient_id__timeline_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/{patient_id}/adherence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Patient Adherence */
+        get: operations["patient_adherence_api_v1_patients__patient_id__adherence_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/{patient_id}/vitals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Patient Vitals */
+        get: operations["patient_vitals_api_v1_patients__patient_id__vitals_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/alerts": {
         parameters: {
             query?: never;
@@ -134,6 +202,23 @@ export interface paths {
         };
         /** Metrics */
         get: operations["metrics_api_v1_alerts_metrics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/alerts/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stream Alerts */
+        get: operations["stream_alerts_api_v1_alerts_stream_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -329,6 +414,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sim/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Session */
+        post: operations["create_session_api_v1_sim_session_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sim/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Poll Messages */
+        get: operations["poll_messages_api_v1_sim_messages_get"];
+        put?: never;
+        /** Send Message */
+        post: operations["send_message_api_v1_sim_messages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sim/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stream Messages */
+        get: operations["stream_messages_api_v1_sim_stream_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -409,6 +546,24 @@ export interface components {
             consent: {
                 [key: string]: unknown;
             };
+        };
+        /** SimMessageRequest */
+        SimMessageRequest: {
+            /** Patient Id */
+            patient_id: string;
+            /** Client Msg Id */
+            client_msg_id: string;
+            /** Text */
+            text?: string | null;
+            /** Language */
+            language?: ("te" | "hi" | "en") | null;
+            /** Quick Reply */
+            quick_reply?: ("yes_taken" | "not_taken" | "no_symptoms" | "have_symptom" | "skip") | null;
+        };
+        /** SimSessionRequest */
+        SimSessionRequest: {
+            /** Patient Id */
+            patient_id: string;
         };
         /** SnoozeRequest */
         SnoozeRequest: {
@@ -555,6 +710,8 @@ export interface operations {
             query?: {
                 status?: string | null;
                 q?: string | null;
+                limit?: number;
+                cursor?: string | null;
             };
             header?: never;
             path?: never;
@@ -689,12 +846,169 @@ export interface operations {
             };
         };
     };
+    patient_messages_api_v1_patients__patient_id__messages_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path: {
+                patient_id: string;
+            };
+            cookie?: {
+                setu_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patient_timeline_api_v1_patients__patient_id__timeline_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path: {
+                patient_id: string;
+            };
+            cookie?: {
+                setu_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patient_adherence_api_v1_patients__patient_id__adherence_get: {
+        parameters: {
+            query?: {
+                days?: number;
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path: {
+                patient_id: string;
+            };
+            cookie?: {
+                setu_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patient_vitals_api_v1_patients__patient_id__vitals_get: {
+        parameters: {
+            query?: {
+                type?: string;
+                days?: number;
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path: {
+                patient_id: string;
+            };
+            cookie?: {
+                setu_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_alerts_api_v1_alerts_get: {
         parameters: {
             query?: {
                 status?: string;
                 severity?: string | null;
                 patient_id?: string | null;
+                limit?: number;
+                cursor?: string | null;
             };
             header?: never;
             path?: never;
@@ -746,6 +1060,37 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    stream_alerts_api_v1_alerts_stream_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                setu_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -1060,7 +1405,9 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
-            cookie?: never;
+            cookie?: {
+                setu_session?: string | null;
+            };
         };
         requestBody: {
             content: {
@@ -1095,7 +1442,9 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
-            cookie?: never;
+            cookie?: {
+                setu_session?: string | null;
+            };
         };
         requestBody?: never;
         responses: {
@@ -1106,12 +1455,94 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
     };
     state_api_v1_demo_state_get: {
         parameters: {
             query?: never;
             header?: never;
+            path?: never;
+            cookie?: {
+                setu_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_session_api_v1_sim_session_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimSessionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    poll_messages_api_v1_sim_messages_get: {
+        parameters: {
+            query: {
+                patient_id: string;
+                after?: string | null;
+            };
+            header?: {
+                "X-Sim-Token"?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -1126,6 +1557,85 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    send_message_api_v1_sim_messages_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Sim-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimMessageRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    stream_messages_api_v1_sim_stream_get: {
+        parameters: {
+            query: {
+                patient_id: string;
+            };
+            header?: {
+                "X-Sim-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

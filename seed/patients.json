@@ -1,5 +1,5 @@
 {
-  "_meta": { "note": "All patients are synthetic. Phone numbers are fake placeholders. discharge_date is set so that on the scenario start date P001 is on day 8.", "scenario_start": "2026-10-26T03:00:00Z", "clinic": "Demo Clinic" },
+  "_meta": { "note": "All patients are synthetic. Phone numbers are fake placeholders. discharge_date is set so that on the scenario start date P001 is on day 8.", "scenario_start": "2026-10-26T02:30:00Z", "clinic": "Demo Clinic" },
   "clinicians": [
     { "id": "C001", "name": "Dr. Anitha", "email": "dr.anitha@demo.setu", "role": "clinician", "password": "demo123" },
     { "id": "C002", "name": "Admin", "email": "admin@demo.setu", "role": "admin", "password": "demo123" }

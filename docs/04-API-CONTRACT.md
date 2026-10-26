@@ -93,19 +93,19 @@ Codes: `validation_error` (422), `not_found` (404), `unauthorized` (401), `forbi
 
 | Method | Path | Notes |
 |---|---|---|
-| POST | `/sim/session` | `{ "patient_id" }` → `{ "token", "patient": {id, name, language} }` |
-| POST | `/sim/messages` | Patient sends a message; returns replies |
-| GET | `/sim/messages?after=<msg_id>` | Poll for new outbound (scheduled check-ins) |
-| GET | `/sim/stream` | SSE for this patient (`message.created`) |
+| POST | `/sim/session` | `{ "patient_id" }` → `{ "token", "patient": {id, name, language} }`; requires consent and persists the fixed disclaimer once |
+| POST | `/sim/messages` | Header `X-Sim-Token`; `{ "patient_id", "client_msg_id", "text", "language", "quick_reply" }`; duplicate `client_msg_id` returns the exact original response snapshot |
+| GET | `/sim/messages?patient_id=P001&after=<msg_id>&limit=50` | Header `X-Sim-Token`; poll up to 100 outbound messages; response includes `next_after` when more remain |
+| GET | `/sim/stream?patient_id=P001` | Header `X-Sim-Token`; patient-scoped SSE (`message.created`) |
 
 **POST /sim/messages — request**
 ```json
 {
+  "patient_id": "P001",
   "client_msg_id": "c-7d1a",
   "text": "కాళ్ళు కొంచెం వాచాయి",
   "language": "te",
-  "quick_reply": null,
-  "audio_base64": null, "audio_mime": null
+  "quick_reply": null
 }
 ```
 **Response**
@@ -120,6 +120,8 @@ Codes: `validation_error` (422), `not_found` (404), `unauthorized` (401), `forbi
 }
 ```
 `quick_replies` in a message: `[{ "id": "yes_taken", "label": "అవును, వేసుకున్నాను" }, ...]`. Quick reply ids: `yes_taken`, `not_taken`, `no_symptoms`, `have_symptom`, `skip`.
+
+An idempotent retry does not rerun extraction or create new messages, events, or alerts. New messages persist and replay the original response, including alert summaries at the time of processing. For a legacy inbound message without a snapshot, its first retry reconstructs and stores a best-effort response from the existing records; subsequent retries replay that snapshot.
 
 **Message object**
 ```json

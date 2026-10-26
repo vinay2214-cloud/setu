@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 from app.config import get_settings
@@ -13,8 +13,13 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 
 def initialize_database() -> None:
-    """Create the SQLite schema from the checked-in SQL source of truth."""
+    """Create the SQLite schema or apply additive runtime migrations to an existing DB."""
     if not settings.database_url.startswith("sqlite"):
+        # PostgreSQL deploys already have the schema; this adds the idempotency snapshot field.
+        with engine.begin() as connection:
+            connection.execute(
+                text("ALTER TABLE messages ADD COLUMN IF NOT EXISTS response_json TEXT")
+            )
         return
 
     database_path = settings.database_url.removeprefix("sqlite:///")
@@ -27,6 +32,11 @@ def initialize_database() -> None:
     schema_path = Path(__file__).resolve().parents[1] / "db" / "schema.sql"
     with sqlite3.connect(path) as connection:
         connection.executescript(schema_path.read_text(encoding="utf-8"))
+        message_columns = {
+            row[1] for row in connection.execute("PRAGMA table_info(messages)").fetchall()
+        }
+        if "response_json" not in message_columns:
+            connection.execute("ALTER TABLE messages ADD COLUMN response_json TEXT")
 
 
 def get_db():

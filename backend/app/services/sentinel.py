@@ -163,6 +163,14 @@ def persist_alerts(
             for row in older
             if SEVERITY_ORDER.get(row["severity"], -1) < SEVERITY_ORDER[primary.severity]
         ]
+        merged_evidence = {
+            item.get("message_id"): item for item in evidence if item.get("message_id")
+        }
+        for old in older:
+            for item in json.loads(old["evidence_json"] or "[]"):
+                if item.get("message_id"):
+                    merged_evidence[item["message_id"]] = item
+        evidence = sorted(merged_evidence.values(), key=lambda item: item.get("at", ""))
         alert_id = (
             f"A-{connection.execute(text('SELECT COUNT(*) FROM alerts')).scalar_one() + 1:04d}"
         )

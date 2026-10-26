@@ -151,7 +151,7 @@
   },
   "validator_denylist": {
     "en": ["diagnos", "you have", "you are suffering", "increase your dose", "reduce your dose", "stop taking"],
-    "te": ["నిర్ధారణ", "మీకు ఉంది"],
+    "te": ["నిర్ధారణ", "మీకు ఉంది", "సమస్య ఉంది"],
     "hi": ["निदान", "आपको है"]
   }
 }

@@ -91,7 +91,7 @@ def _cursor_offset(cursor: str | None) -> int:
         return 0
     try:
         offset = int(base64.b64decode(cursor.encode(), altchars=b"-_", validate=True).decode())
-        if offset < 0:
+        if offset < 0 or offset > 10_000:
             raise ValueError
         return offset
     except (ValueError, UnicodeDecodeError):
@@ -99,6 +99,58 @@ def _cursor_offset(cursor: str | None) -> int:
             status_code=422,
             detail={"code": "validation_error", "message": "Invalid pagination cursor."},
         ) from None
+
+
+def _page(items: list, limit: int, cursor: str | None) -> dict:
+    offset = _cursor_offset(cursor)
+    page_size = min(max(limit, 1), 100)
+    page = items[offset : offset + page_size]
+    next_offset = offset + len(page)
+    next_cursor = (
+        base64.urlsafe_b64encode(str(next_offset).encode()).decode()
+        if next_offset < len(items)
+        else None
+    )
+    return {"items": page, "next_cursor": next_cursor}
+
+
+def _query_page(connection, query: str, params: dict, limit: int, cursor: str | None) -> dict:
+    offset = _cursor_offset(cursor)
+    page_size = min(max(limit, 1), 100)
+    rows = (
+        connection.execute(
+            text(f"{query} LIMIT :page_limit OFFSET :page_offset"),
+            {**params, "page_limit": page_size + 1, "page_offset": offset},
+        )
+        .mappings()
+        .all()
+    )
+    has_more = len(rows) > page_size
+    items = [dict(row) for row in rows[:page_size]]
+    next_offset = offset + len(items)
+    next_cursor = base64.urlsafe_b64encode(str(next_offset).encode()).decode() if has_more else None
+    return {"items": items, "next_cursor": next_cursor}
+
+
+def _api_message(row) -> dict:
+    item = dict(row)
+    return {
+        key: item.get(key)
+        for key in (
+            "id",
+            "patient_id",
+            "direction",
+            "channel",
+            "language",
+            "text",
+            "text_en",
+            "template_key",
+            "created_at",
+        )
+    } | {
+        "intent": json.loads(item["intent_json"] or "{}") if item.get("intent_json") else None,
+        "quick_replies": [],
+    }
 
 
 @router.get("")
@@ -208,6 +260,91 @@ def get_patient(patient_id: str) -> dict:
                 status_code=404, detail={"code": "not_found", "message": "Patient not found."}
             )
         return _patient_payload(connection, patient)
+
+
+@router.get("/{patient_id}/messages")
+def patient_messages(patient_id: str, limit: int = 50, cursor: str | None = None) -> dict:
+    with engine.connect() as connection:
+        page = _query_page(
+            connection,
+            "SELECT * FROM messages WHERE patient_id=:id ORDER BY created_at,id",
+            {"id": patient_id},
+            limit,
+            cursor,
+        )
+        page["items"] = [_api_message(row) for row in page["items"]]
+    return page
+
+
+@router.get("/{patient_id}/timeline")
+def patient_timeline(patient_id: str, limit: int = 50, cursor: str | None = None) -> dict:
+    offset = _cursor_offset(cursor)
+    page_size = min(max(limit, 1), 100)
+    with engine.connect() as connection:
+        items = []
+        for table, kind, at_column in (
+            ("medication_events", "medication", "recorded_at"),
+            ("observations", "observation", "recorded_at"),
+            ("symptoms_reported", "symptom", "recorded_at"),
+            ("check_ins", "check_in", "scheduled_for"),
+            ("alerts", "alert", "created_at"),
+        ):
+            rows = (
+                connection.execute(
+                    text(
+                        f"SELECT * FROM {table} WHERE patient_id=:id ORDER BY {at_column} DESC LIMIT :n OFFSET :offset"
+                    ),
+                    {"id": patient_id, "n": offset + page_size + 1, "offset": 0},
+                )
+                .mappings()
+                .all()
+            )
+            items.extend({"type": kind, "at": row[at_column], "data": dict(row)} for row in rows)
+    items.sort(key=lambda item: item["at"], reverse=True)
+    page = items[offset : offset + page_size]
+    next_cursor = (
+        base64.urlsafe_b64encode(str(offset + len(page)).encode()).decode()
+        if len(items) > offset + page_size
+        else None
+    )
+    return {"items": page, "next_cursor": next_cursor}
+
+
+@router.get("/{patient_id}/adherence")
+def patient_adherence(
+    patient_id: str, days: int = 14, limit: int = 50, cursor: str | None = None
+) -> dict:
+    start = (now().astimezone(IST).date() - timedelta(days=max(1, min(days, 90)) - 1)).isoformat()
+    with engine.connect() as connection:
+        page = _query_page(
+            connection,
+            "SELECT event_date,med_id,slot,status FROM medication_events WHERE patient_id=:id AND event_date>=:start ORDER BY event_date,med_id,slot",
+            {"id": patient_id, "start": start},
+            limit,
+            cursor,
+        )
+    return page
+
+
+@router.get("/{patient_id}/vitals")
+def patient_vitals(
+    patient_id: str,
+    type: str = "glucose",
+    days: int = 14,
+    limit: int = 50,
+    cursor: str | None = None,
+) -> dict:
+    start = (now().astimezone(IST).date() - timedelta(days=max(1, min(days, 90)) - 1)).isoformat()
+    since = f"{start}T00:00:00Z"
+    with engine.connect() as connection:
+        page = _query_page(
+            connection,
+            "SELECT * FROM observations WHERE patient_id=:id AND type=:type AND recorded_at>=:since ORDER BY recorded_at",
+            {"id": patient_id, "type": type, "since": since},
+            limit,
+            cursor,
+        )
+    return page
 
 
 @router.delete("/{patient_id}", status_code=204)
