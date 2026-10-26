@@ -4,6 +4,9 @@ Add a line whenever you assume something, resolve a doc conflict, or reuse outsi
 
 | Date | Area | Assumption / decision | Why | Owner |
 |---|---|---|---|---|
+| 2026-10-26 | Demo alerts | P002/P003/P005 are seeded as open, rule-backed alerts from their fixture summaries; where no original message exists, `evidence_json` stays empty and the audit entry records the fixture reference and an empty `source_message_ids` list | Preserves provenance without inventing patient messages | Codex |
+| 2026-10-26 | Backend models | SQLAlchemy mappings are reflected from `backend/db/schema.sql` at startup | Keeps the checked-in SQL schema as the single DDL source while exposing ORM models for all tables | Codex |
+| 2026-10-26 | Python setup | Use the explicit Python 3.11 interpreter when creating `.venv` | The shell default is Python 3.9.6, below the documented minimum | Codex |
 | 2026-10-26 | Scope | Prototype covers diabetes + hypertension only | Fits the pitch and keeps rule pack reviewable | Team |
 | 2026-10-26 | Channel | Simulator is the primary channel; WhatsApp adapter is stretch | Removes approval dependency from the demo | Team |
 | 2026-10-26 | AI | `mock` provider is the default; Gemini optional | Offline-safe demo | Team |

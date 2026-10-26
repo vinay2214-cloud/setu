@@ -1,6 +1,52 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+from zoneinfo import ZoneInfo
+
+IST = ZoneInfo("Asia/Kolkata")
+
+
+def _offset_seconds() -> int:
+    from sqlalchemy import text
+
+    from app.db import engine
+
+    try:
+        with engine.connect() as connection:
+            value = connection.execute(
+                text("SELECT offset_seconds FROM demo_clock WHERE id = 1")
+            ).scalar_one()
+            return int(value)
+    except Exception:
+        return 0
 
 
 def now() -> datetime:
-    """Return the current UTC time; demo-clock offsets are layered on in P1."""
-    return datetime.now(UTC)
+    """Return current UTC time shifted by the persisted demo-clock offset."""
+    return datetime.now(UTC) + timedelta(seconds=_offset_seconds())
+
+
+def set_time(value: datetime) -> datetime:
+    from sqlalchemy import text
+
+    from app.db import engine
+
+    target = value.astimezone(UTC)
+    offset = int((target - datetime.now(UTC)).total_seconds())
+    with engine.begin() as connection:
+        connection.execute(
+            text("UPDATE demo_clock SET offset_seconds = :offset WHERE id = 1"), {"offset": offset}
+        )
+    return now()
+
+
+def advance(*, days: int = 0, hours: int = 0) -> datetime:
+    return set_time(now() + timedelta(days=days, hours=hours))
+
+
+def reset() -> datetime:
+    from sqlalchemy import text
+
+    from app.db import engine
+
+    with engine.begin() as connection:
+        connection.execute(text("UPDATE demo_clock SET offset_seconds = 0 WHERE id = 1"))
+    return now()
